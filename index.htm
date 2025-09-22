@@ -1,912 +1,891 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!DOCTYPE html>
+<html lang="de">
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta http-equiv="Content-Style-Type" content="text/css">
-  <title></title>
-  <meta name="Generator" content="Cocoa HTML Writer">
-  <meta name="CocoaVersion" content="2575.6">
-  <style type="text/css">
-    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
-    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
-    span.s1 {font-kerning: none}
-    span.s2 {font: 12.0px 'Apple Color Emoji'; font-kerning: none}
-    span.s3 {font: 12.0px 'Lucida Grande'; font-kerning: none}
-    span.s4 {font: 12.0px 'Zapf Dingbats'; font-kerning: none}
-    span.s5 {font: 12.0px 'Hiragino Sans'; font-kerning: none}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Garten Nr. 40 - Kleingartenverein Pfuhl Eile</title>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<style>
+  :root{
+    --glass-bg: rgba(255,255,255,0.34);
+    --muted: #4b5563;
+    --accent-green: #16a34a;
+    --radius: 14px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
+    color:#0f172a;
+    background: linear-gradient(135deg, rgba(212,244,222,0.95), rgba(238,249,240,0.92));
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:24px;
+  }
+  header { padding:14px 16px 6px; text-align:center; }
+  header h1 { margin:0; font-size:1.25rem; font-weight:600; color:#052e16; }
+
+  .container{ max-width:1100px; margin:12px auto; padding:0 12px; display:grid; gap:12px; }
+
+  .iebar{ display:flex; gap:8px; justify-content:center; align-items:center; padding:8px; }
+  .iebar button{ background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.8)); border:1px solid rgba(6,95,70,0.06); padding:8px 12px; border-radius:12px; font-size:14px; cursor:pointer; }
+
+  .glass{ background: var(--glass-bg); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 30px rgba(2,6,23,0.06); backdrop-filter: blur(12px) saturate(1.1); padding:12px; }
+
+  .weather{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }
+  .weather-top{ display:flex; align-items:center; gap:10px; width:100%; justify-content:center; }
+  .weather-icon{ width:28px; height:28px; display:inline-block; }
+  .weather-temp{ font-weight:700; font-size:1.1rem; color:#064e3b; }
+  .weather-loc{ font-size:0.9rem; color:var(--muted); }
+  .weather-divider{ width:60%; height:1px; background: rgba(6,95,70,0.08); border-radius:2px; }
+  .rain-prob{ font-size:0.9rem; color:var(--muted); }
+
+  /* new top boxes wrapper (water + winter) */
+  .topBoxes{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
+  .miniBox{ min-width:160px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:10px; border-radius:12px; }
+  #waterBox .btn, #winterBox .btn { padding:8px 10px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(180deg,#ffffff,#f1f8f1); }
+  .iconSmall{ font-size:18px; margin-right:6px; vertical-align:middle; }
+
+  .todo-list{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+  .todo-item{ background: rgba(255,255,255,0.5); border-radius:10px; padding:8px; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center; }
+
+  .mainGrid{ display:grid; gap:12px; grid-template-columns:1fr; }
+  @media(min-width:980px){ .mainGrid{ grid-template-columns: 1.1fr 0.9fr; } }
+
+  .cal-controls{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; }
+  .cal-btn{ background:transparent; border:1px solid rgba(6,95,70,0.06); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:14px; }
+  .month-year{ font-weight:600; color:#063; font-size:1rem; padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.6); }
+
+  .dow-row{ display:grid; grid-template-columns: repeat(7,1fr); gap:6px; margin-bottom:6px; font-size:12px; color:var(--muted); text-align:center; }
+  .calendar-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; }
+  .day{ min-height:72px; background: rgba(255,255,255,0.7); border-radius:10px; padding:6px; font-size:13px; position:relative; overflow:hidden; cursor:pointer; }
+  .day.selected{ outline:2px solid var(--accent-green); }
+  .num{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+  .event-chip{ display:block; padding:6px 8px; border-radius:10px; font-size:12px; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .chip-harvest{ background: rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.18); color:#7f1d1d; }
+  .chip-prune{ background: rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.18); color:#6b4508; }
+
+  .watering-icon{ position:absolute; right:6px; bottom:6px; font-size:16px; color:var(--accent-green); }
+
+  .rightCol{ display:flex; flex-direction:column; gap:12px; }
+  .item{ background: rgba(255,255,255,0.6); padding:8px; border-radius:10px; font-size:13px; }
+
+  .plants-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }
+  .toggle-btn{ background:transparent; border:none; color:var(--accent-green); font-weight:600; cursor:pointer; margin-top:8px; }
+  .plants-grid{ display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); margin-top:8px; }
+  .plant-box{ background: rgba(255,255,255,0.7); border-radius:12px; padding:10px; font-size:13px; }
+  .plant-section{ margin-top:8px; background: rgba(255,255,255,0.45); padding:8px; border-radius:10px; font-size:13px; }
+
+  input[type="text"], input[type="number"], select{ padding:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); font-size:14px; width:100%; background: rgba(255,255,255,0.9); }
+  .small{ font-size:13px; color:var(--muted); }
+  .hidden{ display:none!important; }
+
+  /* modal */
+  .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.4); display:flex; align-items:center; justify-content:center; z-index:2000; }
+  .modal{ background: rgba(255,255,255,0.95); border-radius:12px; padding:14px; max-width:520px; width:92%; box-shadow:0 12px 40px rgba(2,6,23,0.15); }
+  .modal header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .modal .list{ max-height:320px; overflow:auto; }
+  .modal .list .row{ display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; background:rgba(245,250,245,1); margin-bottom:6px; }
+  .modal .controls{ display:flex; gap:8px; align-items:center; }
+  .icon-save{ color:var(--accent-green); font-weight:700; cursor:pointer; }
+  .icon-close{ cursor:pointer; font-weight:700; }
+</style>
 </head>
 <body>
-<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
-<p class="p1"><span class="s1">&lt;html lang="de"&gt;</span></p>
-<p class="p1"><span class="s1">&lt;head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta charset="utf-8" /&gt;</span></p>
-<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width,initial-scale=1" /&gt;</span></p>
-<p class="p1"><span class="s1">&lt;title&gt;Garten Nr. 40 - Kleingartenverein Pfuhl Eile&lt;/title&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;!-- Firebase (compat) --&gt;</span></p>
-<p class="p1"><span class="s1">&lt;script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"&gt;&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"&gt;&lt;/script&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;style&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>:root{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>--glass-bg: rgba(255,255,255,0.34);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>--muted: #4b5563;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>--accent-green: #16a34a;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>--radius: 14px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>*{box-sizing:border-box}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>html,body{height:100%}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>body{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>margin:0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>color:#0f172a;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>background: linear-gradient(135deg, rgba(212,244,222,0.95), rgba(238,249,240,0.92));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>-webkit-font-smoothing:antialiased;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>padding-bottom:24px;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>header { padding:14px 16px 6px; text-align:center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>header h1 { margin:0; font-size:1.25rem; font-weight:600; color:#052e16; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.container{ max-width:1100px; margin:12px auto; padding:0 12px; display:grid; gap:12px; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.iebar{ display:flex; gap:8px; justify-content:center; align-items:center; padding:8px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.iebar button{ background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(255,255,255,0.8)); border:1px solid rgba(6,95,70,0.06); padding:8px 12px; border-radius:12px; font-size:14px; cursor:pointer; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.glass{ background: var(--glass-bg); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 30px rgba(2,6,23,0.06); backdrop-filter: blur(12px) saturate(1.1); padding:12px; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.weather{ display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.weather-top{ display:flex; align-items:center; gap:10px; width:100%; justify-content:center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.weather-icon{ width:28px; height:28px; display:inline-block; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.weather-temp{ font-weight:700; font-size:1.1rem; color:#064e3b; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.weather-loc{ font-size:0.9rem; color:var(--muted); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.weather-divider{ width:60%; height:1px; background: rgba(6,95,70,0.08); border-radius:2px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.rain-prob{ font-size:0.9rem; color:var(--muted); }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>/* new top boxes wrapper (water + winter) */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.topBoxes{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.miniBox{ min-width:160px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:10px; border-radius:12px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>#waterBox .btn, #winterBox .btn { padding:8px 10px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(180deg,#ffffff,#f1f8f1); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.iconSmall{ font-size:18px; margin-right:6px; vertical-align:middle; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.todo-list{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.todo-item{ background: rgba(255,255,255,0.5); border-radius:10px; padding:8px; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.mainGrid{ display:grid; gap:12px; grid-template-columns:1fr; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>@media(min-width:980px){ .mainGrid{ grid-template-columns: 1.1fr 0.9fr; } }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.cal-controls{ display:flex; gap:8px; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.cal-btn{ background:transparent; border:1px solid rgba(6,95,70,0.06); border-radius:8px; padding:6px 8px; cursor:pointer; font-size:14px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.month-year{ font-weight:600; color:#063; font-size:1rem; padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.6); }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.dow-row{ display:grid; grid-template-columns: repeat(7,1fr); gap:6px; margin-bottom:6px; font-size:12px; color:var(--muted); text-align:center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.calendar-grid{ display:grid; grid-template-columns: repeat(7, 1fr); gap:6px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.day{ min-height:72px; background: rgba(255,255,255,0.7); border-radius:10px; padding:6px; font-size:13px; position:relative; overflow:hidden; cursor:pointer; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.day.selected{ outline:2px solid var(--accent-green); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.num{ font-size:12px; color:var(--muted); margin-bottom:6px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.event-chip{ display:block; padding:6px 8px; border-radius:10px; font-size:12px; margin-top:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.chip-harvest{ background: rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.18); color:#7f1d1d; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.chip-prune{ background: rgba(245,158,11,0.12); border:1px solid rgba(245,158,11,0.18); color:#6b4508; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.watering-icon{ position:absolute; right:6px; bottom:6px; font-size:16px; color:var(--accent-green); }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.rightCol{ display:flex; flex-direction:column; gap:12px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.item{ background: rgba(255,255,255,0.6); padding:8px; border-radius:10px; font-size:13px; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.plants-header{ display:flex; align-items:center; justify-content:space-between; gap:8px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.toggle-btn{ background:transparent; border:none; color:var(--accent-green); font-weight:600; cursor:pointer; margin-top:8px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.plants-grid{ display:grid; gap:10px; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); margin-top:8px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.plant-box{ background: rgba(255,255,255,0.7); border-radius:12px; padding:10px; font-size:13px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.plant-section{ margin-top:8px; background: rgba(255,255,255,0.45); padding:8px; border-radius:10px; font-size:13px; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>input[type="text"], input[type="number"], select{ padding:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); font-size:14px; width:100%; background: rgba(255,255,255,0.9); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.small{ font-size:13px; color:var(--muted); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.hidden{ display:none!important; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>/* modal */</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.4); display:flex; align-items:center; justify-content:center; z-index:2000; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.modal{ background: rgba(255,255,255,0.95); border-radius:12px; padding:14px; max-width:520px; width:92%; box-shadow:0 12px 40px rgba(2,6,23,0.15); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.modal header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.modal .list{ max-height:320px; overflow:auto; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.modal .list .row{ display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; background:rgba(245,250,245,1); margin-bottom:6px; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.modal .controls{ display:flex; gap:8px; align-items:center; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.icon-save{ color:var(--accent-green); font-weight:700; cursor:pointer; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>.icon-close{ cursor:pointer; font-weight:700; }</span></p>
-<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
-<p class="p1"><span class="s1">&lt;body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;header&gt;&lt;h1&gt;Garten Nr. 40 - Kleingartenverein Pfuhl Eile&lt;/h1&gt;&lt;/header&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;div class="container"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- Import/Export bar --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="iebar"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button id="exportBtn"&gt;Exportieren&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;input id="importFile" type="file" accept=".json,application/json" style="display:none" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;button id="importBtn"&gt;Importieren&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="syncStatus" style="margin-left:12px;font-size:13px;color:var(--muted)"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- Weather --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="glass weather" id="weatherBox" title="Wetter: Klick öffnet wetter.com"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-top"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;img id="weatherIcon" class="weather-icon" alt="Wetter" src=""&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="weather-temp" id="weatherTemp"&gt;—°C&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="weather-loc"&gt;Pfuhl&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-divider" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="rainProb" class="rain-prob"&gt;Regenwahrscheinlichkeit: —%&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;!-- NEW: separator + extra infos --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-divider" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="waterHint" class="rain-prob"&gt;Gießhinweis: —&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-divider" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="frostWarn" class="rain-prob"&gt;Frostwarnung: —&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-divider" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="sunHours" class="rain-prob"&gt;Sonnenstunden: —&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-divider" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="windWarn" class="rain-prob"&gt;Wind: —&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="weather-divider" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="pollenInfo" class="rain-prob"&gt;Pollenflug: —&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- ToDo --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="glass"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;h3 style="margin:0 0 8px 0;"&gt;ToDo&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="todoList" class="todo-list"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- NEW TOP BOXES: Gießen + Winter-Checkliste --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="topBoxes"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="glass miniBox" id="waterBox" style="flex:0 1 220px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;align-items:center;gap:8px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button id="waterBtn" class="btn" title="Gießen für ausgewählten Tag (klicken um umzuschalten)"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;span class="iconSmall"&gt;</span><span class="s2">💧</span><span class="s1">&lt;/span&gt; Gießen</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="small" style="text-align:center"&gt;Markiert im Kalender, wenn für einen Tag gegossen wurde.&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="glass miniBox" id="winterBox" style="flex:0 1 280px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;align-items:center;gap:8px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;button id="winterBtn" class="btn" title="Winter-Checkliste öffnen"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;span class="iconSmall"&gt;</span><span class="s2">🗒️</span><span class="s1">&lt;/span&gt; Winter-Checkliste</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="small" style="text-align:center"&gt;Öffne eine anpassbare Checkliste (Popup).&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- Main --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="mainGrid"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="glass calendar-area"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="cal-controls"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="left"&gt;&lt;button class="cal-btn" id="prevMonth"&gt;‹&lt;/button&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="center"&gt;&lt;div class="month-year" id="monthLabel"&gt;Monat&lt;/div&gt;&lt;select id="yearSelect" class="small"&gt;&lt;/select&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="right"&gt;&lt;button class="cal-btn" id="nextMonth"&gt;›&lt;/button&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="dow-row" id="dowRow"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div class="dow"&gt;Mo&lt;/div&gt;&lt;div class="dow"&gt;Di&lt;/div&gt;&lt;div class="dow"&gt;Mi&lt;/div&gt;&lt;div class="dow"&gt;Do&lt;/div&gt;&lt;div class="dow"&gt;Fr&lt;/div&gt;&lt;div class="dow"&gt;Sa&lt;/div&gt;&lt;div class="dow"&gt;So&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="calendar-grid" id="calendarGrid" aria-live="polite"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;aside class="rightCol"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="glass events"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h3 style="margin:0 0 8px 0;"&gt;Ereignis-Liste&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="eventList" class="small"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div class="glass notes"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;h3 style="margin:0 0 8px 0;"&gt;Notizen&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div style="display:flex; gap:8px; margin-bottom:8px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;input id="noteInput" type="text" placeholder="Notiz eingeben…" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>&lt;button id="addNoteBtn"&gt;Hinzufügen&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;div id="notesList" class="small"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/aside&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;!-- Plants collapsible --&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="glass" id="plantsSection"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="plants-header"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;h3 style="margin:0"&gt;Pflanzen&lt;/h3&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;button class="toggle-btn" id="plantsToggle"&gt;</span><span class="s3">▼</span><span class="s1"> Pflanzen anzeigen&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="plantArea" class="plants-grid hidden" aria-hidden="true"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div id="plantAdd" class="hidden" style="margin-top:8px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;input id="newPlantName" type="text" placeholder="Neue Pflanze Name" /&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div style="margin-top:8px;"&gt;&lt;button id="addPlantBtn"&gt;Hinzufügen&lt;/button&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;!-- Winter checklist modal (hidden by default) --&gt;</span></p>
-<p class="p1"><span class="s1">&lt;div id="modalBackdrop" class="hidden" aria-hidden="true"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;div class="modal"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div style="display:flex;gap:10px;align-items:center;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span class="icon-save" id="saveChecklist" title="Speichern"&gt;</span><span class="s2">💾</span><span class="s1">&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;strong&gt;Winter-Checkliste&lt;/strong&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>&lt;span class="icon-close" id="closeChecklist"&gt;</span><span class="s4">✕</span><span class="s1">&lt;/span&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div style="margin-bottom:8px;"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;input id="newChecklistItem" type="text" placeholder="Neues Element hinzufügen" style="width:70%"&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>&lt;button id="addChecklistBtn"&gt;+&lt;/button&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>&lt;div class="list" id="checklistItems"&gt;&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>&lt;/div&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/div&gt;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">&lt;script&gt;</span></p>
-<p class="p1"><span class="s1">/* ===========================</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>App state (kept from your working version)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>=========================== */</span></p>
-<p class="p1"><span class="s1">const months = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">const plants = [</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Hibiskus / Roseneibisch", harvest:false, cut:[6,7]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Zuckerrohr-Palmen", harvest:false, cut:[5,6]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Apfelbaum", harvest:true, harvestRange:[8,9], cut:[2,3]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Kirschbaum", harvest:true, harvestRange:[6,7], cut:[2,3]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Pflaumenbaum", harvest:true, harvestRange:[8,9], cut:[2,3]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Johannisbeere", harvest:true, harvestRange:[7,7], cut:[2,3]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Himbeere", harvest:true, harvestRange:[7,8], cut:[3,4]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Amerikanische Heidelbeere", harvest:true, harvestRange:[7,8], cut:[2,3]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Erdbeeren", harvest:true, harvestRange:[6,7], cut:[2,3]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Fetthenne", harvest:false, cut:[9,10]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Kürbis", harvest:true, unit:"Stück", harvestRange:[9,10]},</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>{name:"Zucchini", harvest:true, unit:"Stück", harvestRange:[7,8]},</span></p>
-<p class="p1"><span class="s1">];</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">let events = []; // array of "YYYY-MM-DD | label" strings (keeps old display format)</span></p>
-<p class="p1"><span class="s1">let notes = [];<span class="Apple-converted-space">  </span>// array of {id,text,iso}</span></p>
-<p class="p1"><span class="s1">let wateringMap = {}; // { "YYYY-MM-DD": true }</span></p>
-<p class="p1"><span class="s1">let winterChecklist = []; // array of {id,text,done}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* DOM refs */</span></p>
-<p class="p1"><span class="s1">const monthLabel = document.getElementById('monthLabel');</span></p>
-<p class="p1"><span class="s1">const yearSelect = document.getElementById('yearSelect');</span></p>
-<p class="p1"><span class="s1">const calendarGrid = document.getElementById('calendarGrid');</span></p>
-<p class="p1"><span class="s1">const eventList = document.getElementById('eventList');</span></p>
-<p class="p1"><span class="s1">const notesList = document.getElementById('notesList');</span></p>
-<p class="p1"><span class="s1">const noteInput = document.getElementById('noteInput');</span></p>
-<p class="p1"><span class="s1">const addNoteBtn = document.getElementById('addNoteBtn');</span></p>
-<p class="p1"><span class="s1">const todoList = document.getElementById('todoList');</span></p>
-<p class="p1"><span class="s1">const weatherIcon = document.getElementById('weatherIcon');</span></p>
-<p class="p1"><span class="s1">const weatherTemp = document.getElementById('weatherTemp');</span></p>
-<p class="p1"><span class="s1">const rainProbEl = document.getElementById('rainProb');</span></p>
-<p class="p1"><span class="s1">const waterBtn = document.getElementById('waterBtn');</span></p>
-<p class="p1"><span class="s1">const winterBtn = document.getElementById('winterBtn');</span></p>
-<p class="p1"><span class="s1">const modalBackdrop = document.getElementById('modalBackdrop');</span></p>
-<p class="p1"><span class="s1">const checklistItems = document.getElementById('checklistItems');</span></p>
-<p class="p1"><span class="s1">const newChecklistItem = document.getElementById('newChecklistItem');</span></p>
-<p class="p1"><span class="s1">const addChecklistBtn = document.getElementById('addChecklistBtn');</span></p>
-<p class="p1"><span class="s1">const saveChecklist = document.getElementById('saveChecklist');</span></p>
-<p class="p1"><span class="s1">const closeChecklist = document.getElementById('closeChecklist');</span></p>
-<p class="p1"><span class="s1">const exportBtn = document.getElementById('exportBtn');</span></p>
-<p class="p1"><span class="s1">const importBtn = document.getElementById('importBtn');</span></p>
-<p class="p1"><span class="s1">const importFile = document.getElementById('importFile');</span></p>
-<p class="p1"><span class="s1">const syncStatus = document.getElementById('syncStatus');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">let current = new Date();</span></p>
-<p class="p1"><span class="s1">let selectedDateISO = null; // YYYY-MM-DD</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* ===========================</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>Firebase setup (replace config)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>===========================</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>STEPS (kurze Anleitung):</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>1) Gehe zu https://console.firebase.google.com/ und erstelle ein Projekt.</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>2) Aktiviere "Firestore" (Datenbank) - Native Modus.</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>3) In Project settings -&gt; Your apps -&gt; Web app -&gt; Add app, kopiere die firebaseConfig (ersetzt das Platzhalter-Objekt unten).</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>4) Setze unter Firestore Security Rules (nur für erste Tests) temporär:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">       </span>rules_version = '2';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">       </span>service cloud.firestore {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">         </span>match /databases/{database}/documents {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">           </span>match /{document=**} {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">             </span>allow read, write: if true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">           </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">         </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">       </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">     </span>(Wichtig: Öffne die Regeln später sicherer mit Authentication.)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>5) Speichere die firebaseConfig in der Datei an der markierten Stelle und lade die Seite neu.</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>Hinweis: Dieser Code nutzt anonyme Authentifizierung, damit mehrere Nutzer gleichzeitig schreiben können.</span></p>
-<p class="p1"><span class="s1">*/</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">let useFirestore = false;</span></p>
-<p class="p1"><span class="s1">let db = null;</span></p>
-<p class="p1"><span class="s1">const firebaseConfig = {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>apiKey: "AIzaSyB2UunTDA4JBfJIU2kqLnE_O3xQY44lIG0",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>authDomain: "gartenplaner-ca2cf.firebaseapp.com",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>projectId: "gartenplaner-ca2cf",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>storageBucket: "gartenplaner-ca2cf.appspot.com",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>messagingSenderId: "648271569301",</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>appId: "1:648271569301:web:b3823f824cba58b180169c"</span></p>
-<p class="p1"><span class="s1">};;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// If firebaseConfig is filled (check minimal required fields), initialize</span></p>
-<p class="p1"><span class="s1">try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if (firebaseConfig &amp;&amp; firebaseConfig.apiKey) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>firebase.initializeApp(firebaseConfig);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// anonymous auth</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>firebase.auth().signInAnonymously().catch((e)=&gt;{ console.warn('Firebase auth',e); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>db = firebase.firestore();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>useFirestore = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>syncStatus.textContent = 'Verbunden: Firebase (Realtime)';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// set up listeners</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>setupFirestoreListeners();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>syncStatus.textContent = 'Lokaler Modus (kein Firebase konfiguriert)';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1">} catch (err) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>console.warn('Firebase init failed', err);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>syncStatus.textContent = 'Firebase-Fehler (Lokaler Modus)';</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* ===========================</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>Firestore listeners &amp; writes</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>=========================== */</span></p>
-<p class="p1"><span class="s1">function setupFirestoreListeners(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!db) return;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// events</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>db.collection('events').orderBy('createdAt','desc').onSnapshot(snap=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>events = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>snap.forEach(doc=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const d = doc.data();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(d.date &amp;&amp; d.text){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>events.push(`${d.date} | ${d.text}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderEvents();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderCalendar();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// notes</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>db.collection('notes').orderBy('createdAt','desc').onSnapshot(snap=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>notes = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>snap.forEach(doc=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const d = doc.data();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>notes.push({ id: doc.id, text: d.text, iso: d.createdAt? d.createdAt.toDate().toISOString() : new Date().toISOString() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderNotes();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// plants (replace whole local plants if db has docs)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>db.collection('plants').onSnapshot(snap=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const ptmp = [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>snap.forEach(doc=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const d = doc.data();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>ptmp.push(d);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Only replace if collection not empty (so we keep local defaults otherwise)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(ptmp.length&gt;0){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// mutate local plants array to match DB</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>plants.length = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>ptmp.forEach(p=&gt;plants.push(p));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>renderPlants();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>renderTodo();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>renderCalendar();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// watering markers</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>db.collection('watering').onSnapshot(snap=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>wateringMap = {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>snap.forEach(doc=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const d = doc.data();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(d.date) wateringMap[d.date] = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderCalendar(); // watering icons are drawn in calendar</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// winter checklist (single doc 'checklist/items' or doc id 'checklist')</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>db.collection('appdata').doc('winterChecklist').onSnapshot(doc=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const d = doc.data();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(d &amp;&amp; Array.isArray(d.items)){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>winterChecklist = d.items;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// If modal open -&gt; render</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>renderChecklistItems();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">async function saveEventToFirestore(dateISO, text){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!useFirestore || !db) {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// fallback: local events array</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>events.unshift(`${dateISO} | ${text}`);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderEvents(); renderCalendar();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await db.collection('events').add({ date: dateISO, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}catch(e){ console.warn('saveEvent', e); }</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">async function toggleWateringFor(dateISO){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!useFirestore || !db){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(wateringMap[dateISO]){ delete wateringMap[dateISO]; } else { wateringMap[dateISO] = true; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderCalendar();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// check if doc exists with date == dateISO</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const q = await db.collection('watering').where('date','==',dateISO).get();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!q.empty){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// remove (use first match)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const id = q.docs[0].id;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await db.collection('watering').doc(id).delete();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await db.collection('watering').add({ date: dateISO, createdAt: firebase.firestore.FieldValue.serverTimestamp() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Winter checklist saves (store as single doc in collection 'appdata' id 'winterChecklist') */</span></p>
-<p class="p1"><span class="s1">async function saveChecklistToFirestore(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!useFirestore || !db){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// local only: nothing special, we set winterChecklist</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderChecklistItems();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await db.collection('appdata').doc('winterChecklist').set({ items: winterChecklist }, { merge:true });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}catch(e){ console.warn('saveChecklist', e); }</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* ===========================</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>Utility &amp; rendering</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">   </span>=========================== */</span></p>
-<p class="p1"><span class="s1">function uid(){ return Math.random().toString(36).slice(2,9); }</span></p>
-<p class="p1"><span class="s1">function pad(n){ return String(n).padStart(2,'0'); }</span></p>
-<p class="p1"><span class="s1">function isoFor(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Year select */</span></p>
-<p class="p1"><span class="s1">function populateYears(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const y = new Date().getFullYear();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>yearSelect.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>for(let i=y-5;i&lt;=y+5;i++){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const opt = document.createElement('option');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>opt.value = i; opt.textContent = i;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(i===current.getFullYear()) opt.selected = true;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>yearSelect.appendChild(opt);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">populateYears();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Calendar rendering + selection + watering icons */</span></p>
-<p class="p1"><span class="s1">function renderCalendar(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>calendarGrid.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const y = current.getFullYear();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const m = current.getMonth();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>monthLabel.textContent = current.toLocaleString('de-DE',{month:'long', year:'numeric'});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const firstDate = new Date(y,m,1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const offset = (firstDate.getDay() + 6) % 7;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>for(let i=0;i&lt;offset;i++){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const blank = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>blank.className = 'day';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>blank.style.background='transparent';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>calendarGrid.appendChild(blank);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const daysInMonth = new Date(y,m+1,0).getDate();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>for(let d=1; d&lt;=daysInMonth; d++){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const cell = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cell.className = 'day';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const num = document.createElement('div'); num.className='num'; num.textContent = d+'.';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cell.appendChild(num);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const iso = isoFor(y,m+1,d);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// show event chips (existing format "YYYY-MM-DD | text")</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>events.forEach(ev=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(typeof ev === 'string' &amp;&amp; ev.startsWith(iso + ' | ')){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const txt = ev.split(' | ')[1] || ev;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const chip = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>chip.className = 'event-chip ' + (txt.toLowerCase().includes('ernte') ? 'chip-harvest' : 'chip-prune');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>chip.textContent = txt;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>cell.appendChild(chip);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// watering icon</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(wateringMap[iso]){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const w = document.createElement('span');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>w.className = 'watering-icon';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>w.title = 'Gegossen';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>w.textContent = '</span><span class="s2">💧</span><span class="s1">';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cell.appendChild(w);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// selection behavior</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cell.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// clear prev selection</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>document.querySelectorAll('.day.selected').forEach(el=&gt;el.classList.remove('selected'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cell.classList.add('selected');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>selectedDateISO = iso;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>calendarGrid.appendChild(cell);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderTodo(); // update ToDo on calendar render</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Events &amp; notes rendering */</span></p>
-<p class="p1"><span class="s1">function renderEvents(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>eventList.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>events.forEach(e=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const div = document.createElement('div'); div.className='item';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const [date,txt] = e.split(' | ');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>div.innerHTML = `&lt;div style="font-weight:600"&gt;${txt}&lt;/div&gt;&lt;div class="small" style="color:var(--muted)"&gt;${date}&lt;/div&gt;`;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>eventList.appendChild(div);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function renderNotes(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>notesList.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>notes.slice().reverse().forEach(n=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const div = document.createElement('div'); div.className='item';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const txt = document.createElement('div'); txt.textContent = n.text;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const meta = document.createElement('div'); meta.className='small'; meta.style.color='var(--muted)';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>meta.textContent = new Date(n.iso).toLocaleString('de-DE');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const del = document.createElement('button'); del.textContent='×'; del.style.marginLeft='8px';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>del.onclick = async ()=&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(useFirestore &amp;&amp; db){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// delete by text+iso approximation (simple approach): find doc with same iso</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const q = await db.collection('notes').where('createdAt','!=', null).get().catch(()=&gt;null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// fallback: just remove locally</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>notes = notes.filter(x=&gt;x.id!==n.id);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>renderNotes(); renderCalendar();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>div.appendChild(txt); div.appendChild(meta); div.appendChild(del);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>notesList.appendChild(div);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* ToDo generation */</span></p>
-<p class="p1"><span class="s1">function renderTodo(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>todoList.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const month = current.getMonth() + 1;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>plants.forEach(p=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(Array.isArray(p.harvestRange) &amp;&amp; p.harvestRange.length&gt;=2){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [from,to] = p.harvestRange;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const inRange = from &lt;= to ? (month&gt;=from &amp;&amp; month&lt;=to) : (month&gt;=from || month&lt;=to);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(inRange){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const el = document.createElement('div'); el.className='todo-item'; el.textContent = p.name + ' - Ernte fällig';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>todoList.appendChild(el);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(Array.isArray(p.cut) &amp;&amp; p.cut.length&gt;=2){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const [from,to] = p.cut;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const inRange = from &lt;= to ? (month&gt;=from &amp;&amp; month&lt;=to) : (month&gt;=from || month&lt;=to);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(inRange){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const el = document.createElement('div'); el.className='todo-item'; el.textContent = p.name + ' - Zuschnitt fällig';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>todoList.appendChild(el);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Plants rendering (collapsible) */</span></p>
-<p class="p1"><span class="s1">const plantArea = document.getElementById('plantArea');</span></p>
-<p class="p1"><span class="s1">const plantAdd = document.getElementById('plantAdd');</span></p>
-<p class="p1"><span class="s1">const plantsToggle = document.getElementById('plantsToggle');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function renderPlants(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>plantArea.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>plants.forEach((p, idx)=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const box = document.createElement('div'); box.className='plant-box';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const title = document.createElement('div'); title.style.fontWeight='700'; title.textContent = p.name; box.appendChild(title);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// cut</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const cutSec = document.createElement('div'); cutSec.className='plant-section';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const cutLabel = document.createElement('label');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const cutCb = document.createElement('input'); cutCb.type='checkbox';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let cutState = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cutCb.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>cutState++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(cutState===1){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Zuschnitt in Arbeit`); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>else if(cutState===2){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Zuschnitt erledigt`); cutCb.disabled=true; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cutLabel.appendChild(cutCb); cutLabel.append(' erledigt'); cutSec.appendChild(cutLabel);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// cut period selects</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const fromSel = document.createElement('select'); const toSel = document.createElement('select');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const emptyOpt = document.createElement('option'); emptyOpt.value=''; emptyOpt.text='-'; fromSel.appendChild(emptyOpt.cloneNode(true)); toSel.appendChild(emptyOpt.cloneNode(true));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>for(let i=1;i&lt;=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent = months[i-1]; if(p.cut &amp;&amp; p.cut[0]===i) o.selected=true; fromSel.appendChild(o); const o2=o.cloneNode(true); if(p.cut &amp;&amp; p.cut[1]===i) o2.selected=true; toSel.appendChild(o2); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const periodWrap = document.createElement('div'); periodWrap.style.marginTop='6px'; periodWrap.append('Zeitraum: '); periodWrap.appendChild(fromSel); periodWrap.append(' bis '); periodWrap.appendChild(toSel);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>fromSel.addEventListener('change', ()=&gt;{ p.cut = [ Number(fromSel.value)||null, Number(toSel.value)||null ]; renderCalendar(); renderTodo(); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>toSel.addEventListener('change', ()=&gt;{ p.cut = [ Number(fromSel.value)||null, Number(toSel.value)||null ]; renderCalendar(); renderTodo(); });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cutSec.appendChild(periodWrap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box.appendChild(cutSec);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// harvest</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const harvSec = document.createElement('div'); harvSec.className='plant-section';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const harvEnableLbl = document.createElement('label');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const harvEnable = document.createElement('input'); harvEnable.type='checkbox';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>harvEnable.checked = !!p.harvest;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>harvEnable.addEventListener('change', ()=&gt;{ p.harvest = harvEnable.checked; renderPlants(); renderTodo(); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>harvEnableLbl.appendChild(harvEnable); harvEnableLbl.append(' Ernte aktivieren');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>harvSec.appendChild(harvEnableLbl);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(p.harvest){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const harvDoneLabel = document.createElement('label');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const harvCb = document.createElement('input'); harvCb.type='checkbox';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>let harvState = 0;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const amount = document.createElement('input'); amount.type='number'; amount.placeholder = p.unit || 'kg';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>harvCb.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>harvState++;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(harvState===1){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Ernte in Arbeit`); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>else if(harvState===2){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Ernte erledigt ${amount.value||''} ${p.unit||'kg'}`); harvCb.disabled=true; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>});</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>harvDoneLabel.appendChild(harvCb); harvDoneLabel.append(' erledigt'); harvSec.appendChild(harvDoneLabel);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// harvest range selects</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const hf = document.createElement('select'); const ht = document.createElement('select');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>hf.appendChild(emptyOpt.cloneNode(true)); ht.appendChild(emptyOpt.cloneNode(true));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>for(let i=1;i&lt;=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent = months[i-1]; if(p.harvestRange &amp;&amp; p.harvestRange[0]===i) o.selected=true; hf.appendChild(o); const o2=o.cloneNode(true); if(p.harvestRange &amp;&amp; p.harvestRange[1]===i) o2.selected=true; ht.appendChild(o2); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>hf.addEventListener('change', ()=&gt;{ p.harvestRange = [ Number(hf.value)||null, Number(ht.value)||null ]; renderTodo(); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>ht.addEventListener('change', ()=&gt;{ p.harvestRange = [ Number(hf.value)||null, Number(ht.value)||null ]; renderTodo(); });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const harvRangeWrap = document.createElement('div');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>harvRangeWrap.append('Zeitraum: '); harvRangeWrap.appendChild(hf); harvRangeWrap.append(' bis '); harvRangeWrap.appendChild(ht);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>harvSec.appendChild(harvRangeWrap);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>harvSec.appendChild(document.createElement('br'));</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>harvSec.appendChild(amount);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const del = document.createElement('button'); del.textContent = 'Pflanze löschen'; del.style.marginTop = '8px';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>del.addEventListener('click', ()=&gt;{ plants.splice(idx,1); renderPlants(); renderCalendar(); renderTodo(); });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box.appendChild(harvSec);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>box.appendChild(del);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>plantArea.appendChild(box);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* toggle plants UI */</span></p>
-<p class="p1"><span class="s1">const toggleBtn = document.getElementById('plantsToggle');</span></p>
-<p class="p1"><span class="s1">toggleBtn.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const visible = !plantArea.classList.contains('hidden');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(visible){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>plantArea.classList.add('hidden'); plantAdd.classList.add('hidden'); toggleBtn.textContent = '</span><span class="s3">▼</span><span class="s1"> Pflanzen anzeigen';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} else {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>plantArea.classList.remove('hidden'); plantAdd.classList.remove('hidden'); toggleBtn.textContent = '</span><span class="s5">▲</span><span class="s1"> Pflanzen verbergen';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderPlants();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* add plant */</span></p>
-<p class="p1"><span class="s1">document.getElementById('addPlantBtn').addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const name = document.getElementById('newPlantName').value.trim();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!name) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>plants.push({ name, harvest:true, harvestRange:null, cut:null });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>document.getElementById('newPlantName').value = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderPlants();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderTodo();</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* export / import (keeps existing behavior) */</span></p>
-<p class="p1"><span class="s1">exportBtn.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const payload = { plants, events, notes };</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `garten-dashboard-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href);</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p1"><span class="s1">importBtn.addEventListener('click', ()=&gt; importFile.click());</span></p>
-<p class="p1"><span class="s1">importFile.addEventListener('change', (e)=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const f = e.target.files[0]; if(!f) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const r = new FileReader();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>r.onload = ()=&gt; {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>try{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const data = JSON.parse(r.result);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(Array.isArray(data.plants)) { plants.length = 0; data.plants.forEach(p =&gt; plants.push(p)); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>events = Array.isArray(data.events) ? data.events.slice() : [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>notes = Array.isArray(data.notes) ? data.notes.slice() : [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>renderPlants(); renderCalendar(); renderEvents(); renderNotes(); renderTodo();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>alert('Import erfolgreich.');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>// optionally push imported data to Firestore if enabled:</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(useFirestore &amp;&amp; db){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// push plants (clear collection then add) - careful: destructive</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>// For now we will not auto-overwrite DB on import to avoid destructive sync.</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}catch(err){ alert('Import fehlgeschlagen: ' + err.message); }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>r.readAsText(f);</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Weather (robust loader, auto-refresh) */</span></p>
-<p class="p1"><span class="s1">async function loadWeather(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try {</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const url = 'https://api.open-meteo.com/v1/forecast?latitude=48.408&amp;longitude=10.0375&amp;daily=precipitation_probability_mean,precipitation_sum,temperature_2m_min,sunshine_duration,windspeed_10m_max&amp;current_weather=true&amp;timezone=Europe%2FBerlin';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const res = await fetch(url);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(!res.ok) throw new Error('HTTP ' + res.status);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const data = await res.json();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const cw = data.current_weather || {};</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (cw.temperature !== undefined) weatherTemp.textContent = Math.round(cw.temperature) + '°C'; else weatherTemp.textContent = '—°C';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const code = Number(cw.weathercode ?? -1);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(code &gt;= 0){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(code &lt; 3) weatherIcon.src = 'https://img.icons8.com/ios-filled/50/000000/sun.png';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>else if(code &lt; 61) weatherIcon.src = 'https://img.icons8.com/ios-filled/50/000000/partly-cloudy-day.png';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>else weatherIcon.src = 'https://img.icons8.com/ios-filled/50/000000/rain.png';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>} else weatherIcon.src = '';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// rain probability</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const probArr = data.daily?.precipitation_probability_mean;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const prob = Array.isArray(probArr) &amp;&amp; probArr.length &gt; 0 ? Math.round(probArr[0]) : null;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>rainProbEl.textContent = prob !== null ? 'Regenwahrscheinlichkeit: ' + prob + '%' : 'Regenwahrscheinlichkeit: —%';</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// water hint (today + tomorrow precipitation sum)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const precArr = data.daily?.precipitation_sum || [];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const rainToday = Number(precArr[0] ?? 0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const rainTomorrow = Number(precArr[1] ?? 0);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('waterHint').textContent = 'Gießhinweis: ' + ((rainToday + rainTomorrow) &lt; 1 ? 'Gießen empfohlen' : 'Kein Gießen nötig');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// frost</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const tminArr = data.daily?.temperature_2m_min;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const tmin = Array.isArray(tminArr) &amp;&amp; tminArr.length&gt;0 ? Number(tminArr[0]) : null;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('frostWarn').textContent = 'Frostwarnung: ' + ((tmin !== null &amp;&amp; tmin &lt; 2) ? 'Achtung: Bodenfrost möglich!' : 'Kein Frost erwartet');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// sun hours</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const sunArr = data.daily?.sunshine_duration;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>let sunHours = '—';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(Array.isArray(sunArr) &amp;&amp; sunArr.length &gt; 0){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>let v = Number(sunArr[0]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(isFinite(v)){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(v &gt; 24) v = v / 3600;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>sunHours = (Math.round(v*10)/10) + 'h';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('sunHours').textContent = 'Sonnenstunden: ' + sunHours;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// wind</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const windArr = data.daily?.windspeed_10m_max;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const windVal = (Array.isArray(windArr) &amp;&amp; windArr.length&gt;0) ? Number(windArr[0]) : (cw.windspeed ?? null);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const windText = (windVal === null) ? '—' : (windVal &gt; 50 ? 'Sturmwarnung! (' + windVal + ' km/h)' : windVal + ' km/h');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('windWarn').textContent = 'Wind: ' + windText;</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// pollen (separate call)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>try{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>const pRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.408&amp;longitude=10.0375&amp;daily=alder_pollen,birch_pollen,grass_pollen,ragweed_pollen&amp;timezone=Europe%2FBerlin');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>if(pRes.ok){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const pData = await pRes.json();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>const grass = pData.daily?.grass_pollen;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>let pollenText = '—';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>if(Array.isArray(grass) &amp;&amp; grass.length&gt;0){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>const val = Number(grass[0]);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>const labels = ['keine Belastung','gering','mittel','hoch'];</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">          </span>pollenText = labels[val] ?? String(val);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>document.getElementById('pollenInfo').textContent = 'Pollenflug (Gräser): ' + pollenText;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>} else document.getElementById('pollenInfo').textContent = 'Pollenflug: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}catch(pErr){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>document.getElementById('pollenInfo').textContent = 'Pollenflug: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>console.warn('Pollen-API Fehler', pErr);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// ensure weather box opens wetter.com (single handler)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const wb = document.getElementById('weatherBox');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(wb) wb.onclick = () =&gt; window.open('https://www.wetter.com/wetter/pfuhl/DE0004144.html','_blank');</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>} catch(err){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>console.warn('Fehler beim Laden der Wetterdaten:', err);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>weatherTemp.textContent = '—°C';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>rainProbEl.textContent = 'Regenwahrscheinlichkeit: —%';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('waterHint').textContent = 'Gießhinweis: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('frostWarn').textContent = 'Frostwarnung: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('sunHours').textContent = 'Sonnenstunden: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('windWarn').textContent = 'Wind: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('pollenInfo').textContent = 'Pollenflug: —';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">// initial + refresh</span></p>
-<p class="p1"><span class="s1">loadWeather();</span></p>
-<p class="p1"><span class="s1">setInterval(loadWeather, 20 * 60 * 1000);</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* ===== initial render &amp; controls ===== */</span></p>
-<p class="p1"><span class="s1">function renderAll(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderCalendar();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderEvents();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderNotes();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderPlants();</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">renderAll();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">document.getElementById('prevMonth').addEventListener('click', ()=&gt;{ current.setMonth(current.getMonth()-1); renderCalendar(); });</span></p>
-<p class="p1"><span class="s1">document.getElementById('nextMonth').addEventListener('click', ()=&gt;{ current.setMonth(current.getMonth()+1); renderCalendar(); });</span></p>
-<p class="p1"><span class="s1">yearSelect.addEventListener('change', ()=&gt;{ current.setFullYear(Number(yearSelect.value)); renderCalendar(); });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Add note */</span></p>
-<p class="p1"><span class="s1">addNoteBtn.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const v = noteInput.value.trim(); if(!v) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>noteInput.value = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>// save to Firestore (or local)</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>saveNoteToFirestore(v);</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* save note */</span></p>
-<p class="p1"><span class="s1">async function saveNoteToFirestore(text){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!useFirestore || !db){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>notes.push({ id: uid(), text, iso: new Date().toISOString() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderNotes(); return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>await db.collection('notes').add({ text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}catch(e){ console.warn('saveNote', e); }</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* add event for today helper */</span></p>
-<p class="p1"><span class="s1">function addEventForToday(label){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const now = new Date();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const iso = isoFor(now.getFullYear(), now.getMonth()+1, now.getDate());</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>saveEventToFirestore(iso, label);</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* saveEventToFirestore implemented above */</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Water button behavior */</span></p>
-<p class="p1"><span class="s1">waterBtn.addEventListener('click', async ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!selectedDateISO){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>alert('Bitte zunächst ein Datum im Kalender auswählen, auf das du das Gießen setzen möchtest.');</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>await toggleWateringFor(selectedDateISO);</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* toggleWateringFor implemented above */</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Winter checklist modal controls */</span></p>
-<p class="p1"><span class="s1">winterBtn.addEventListener('click', ()=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>modalBackdrop.classList.remove('hidden'); modalBackdrop.style.display='flex';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>renderChecklistItems();</span></p>
-<p class="p1"><span class="s1">});</span></p>
-<p class="p1"><span class="s1">closeChecklist.addEventListener('click', ()=&gt;{ modalBackdrop.classList.add('hidden'); modalBackdrop.style.display='none'; });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">function renderChecklistItems(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>checklistItems.innerHTML = '';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>(winterChecklist || []).forEach((it, idx)=&gt;{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const row = document.createElement('div'); row.className='row';</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!it.done;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>cb.addEventListener('change', async ()=&gt;{ winterChecklist[idx].done = cb.checked; await saveChecklistToFirestore(); renderChecklistItems(); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const label = document.createElement('div'); label.style.flex='1'; label.textContent = it.text;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const del = document.createElement('button'); del.textContent='×'; del.addEventListener('click', async ()=&gt;{ winterChecklist.splice(idx,1); await saveChecklistToFirestore(); renderChecklistItems(); });</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>row.appendChild(cb); row.appendChild(label); row.appendChild(del);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>checklistItems.appendChild(row);</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">addChecklistBtn.addEventListener('click', async ()=&gt;{ const v = newChecklistItem.value.trim(); if(!v) return; winterChecklist.push({ id: uid(), text:v, done:false }); newChecklistItem.value=''; await saveChecklistToFirestore(); renderChecklistItems(); });</span></p>
-<p class="p1"><span class="s1">saveChecklist.addEventListener('click', async ()=&gt;{ await saveChecklistToFirestore(); alert('Checkliste gespeichert.'); });</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Firestore initial fetch of checklist if firestore used */</span></p>
-<p class="p1"><span class="s1">async function loadChecklistFromFirestore(){</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>if(!useFirestore || !db) return;</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>try{</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const doc = await db.collection('appdata').doc('winterChecklist').get();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if(doc.exists){ const d = doc.data(); if(d &amp;&amp; Array.isArray(d.items)) winterChecklist = d.items; }</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>renderChecklistItems();</span></p>
-<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}catch(e){ console.warn('loadChecklist', e); }</span></p>
-<p class="p1"><span class="s1">}</span></p>
-<p class="p1"><span class="s1">loadChecklistFromFirestore();</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Toggle plants UI already implemented earlier */</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* Basic helpers for local fallback already in code */</span></p>
-<p class="p2"><span class="s1"></span><br></p>
-<p class="p1"><span class="s1">/* end of script */</span></p>
-<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
-<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+<header><h1>Garten Nr. 40 - Kleingartenverein Pfuhl Eile</h1></header>
+
+<div class="container">
+  <!-- Import/Export bar -->
+  <div class="iebar">
+    <button id="exportBtn">Exportieren</button>
+    <input id="importFile" type="file" accept=".json,application/json" style="display:none" />
+    <button id="importBtn">Importieren</button>
+    <div id="syncStatus" style="margin-left:12px;font-size:13px;color:var(--muted)"></div>
+  </div>
+
+  <!-- Weather -->
+  <div class="glass weather" id="weatherBox" title="Wetter: Klick öffnet wetter.com">
+    <div class="weather-top">
+      <img id="weatherIcon" class="weather-icon" alt="Wetter" src="">
+      <div>
+        <div class="weather-temp" id="weatherTemp">—°C</div>
+        <div class="weather-loc">Pfuhl</div>
+      </div>
+    </div>
+
+    <div class="weather-divider" aria-hidden="true"></div>
+    <div id="rainProb" class="rain-prob">Regenwahrscheinlichkeit: —%</div>
+
+    <!-- NEW: separator + extra infos -->
+    <div class="weather-divider" aria-hidden="true"></div>
+    <div id="waterHint" class="rain-prob">Gießhinweis: —</div>
+    <div class="weather-divider" aria-hidden="true"></div>
+    <div id="frostWarn" class="rain-prob">Frostwarnung: —</div>
+    <div class="weather-divider" aria-hidden="true"></div>
+    <div id="sunHours" class="rain-prob">Sonnenstunden: —</div>
+    <div class="weather-divider" aria-hidden="true"></div>
+    <div id="windWarn" class="rain-prob">Wind: —</div>
+    <div class="weather-divider" aria-hidden="true"></div>
+    <div id="pollenInfo" class="rain-prob">Pollenflug: —</div>
+  </div>
+
+  <!-- ToDo -->
+  <div class="glass">
+    <h3 style="margin:0 0 8px 0;">ToDo</h3>
+    <div id="todoList" class="todo-list"></div>
+  </div>
+
+  <!-- NEW TOP BOXES: Gießen + Winter-Checkliste -->
+  <div class="topBoxes">
+    <div class="glass miniBox" id="waterBox" style="flex:0 1 220px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="waterBtn" class="btn" title="Gießen für ausgewählten Tag (klicken um umzuschalten)">
+          <span class="iconSmall">💧</span> Gießen
+        </button>
+      </div>
+      <div class="small" style="text-align:center">Markiert im Kalender, wenn für einen Tag gegossen wurde.</div>
+    </div>
+
+    <div class="glass miniBox" id="winterBox" style="flex:0 1 280px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <button id="winterBtn" class="btn" title="Winter-Checkliste öffnen">
+          <span class="iconSmall">🗒️</span> Winter-Checkliste
+        </button>
+      </div>
+      <div class="small" style="text-align:center">Öffne eine anpassbare Checkliste (Popup).</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="mainGrid">
+    <div class="glass calendar-area">
+      <div class="cal-controls">
+        <div class="left"><button class="cal-btn" id="prevMonth">‹</button></div>
+        <div class="center"><div class="month-year" id="monthLabel">Monat</div><select id="yearSelect" class="small"></select></div>
+        <div class="right"><button class="cal-btn" id="nextMonth">›</button></div>
+      </div>
+
+      <div class="dow-row" id="dowRow">
+        <div class="dow">Mo</div><div class="dow">Di</div><div class="dow">Mi</div><div class="dow">Do</div><div class="dow">Fr</div><div class="dow">Sa</div><div class="dow">So</div>
+      </div>
+
+      <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
+    </div>
+
+    <aside class="rightCol">
+      <div class="glass events">
+        <h3 style="margin:0 0 8px 0;">Ereignis-Liste</h3>
+        <div id="eventList" class="small"></div>
+      </div>
+
+      <div class="glass notes">
+        <h3 style="margin:0 0 8px 0;">Notizen</h3>
+        <div style="display:flex; gap:8px; margin-bottom:8px;">
+          <input id="noteInput" type="text" placeholder="Notiz eingeben…" />
+          <button id="addNoteBtn">Hinzufügen</button>
+        </div>
+        <div id="notesList" class="small"></div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Plants collapsible -->
+  <div class="glass" id="plantsSection">
+    <div class="plants-header">
+      <h3 style="margin:0">Pflanzen</h3>
+      <button class="toggle-btn" id="plantsToggle">▼ Pflanzen anzeigen</button>
+    </div>
+
+    <div id="plantArea" class="plants-grid hidden" aria-hidden="true"></div>
+    <div id="plantAdd" class="hidden" style="margin-top:8px;">
+      <input id="newPlantName" type="text" placeholder="Neue Pflanze Name" />
+      <div style="margin-top:8px;"><button id="addPlantBtn">Hinzufügen</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Winter checklist modal (hidden by default) -->
+<div id="modalBackdrop" class="hidden" aria-hidden="true">
+  <div class="modal">
+    <header>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span class="icon-save" id="saveChecklist" title="Speichern">💾</span>
+        <strong>Winter-Checkliste</strong>
+      </div>
+      <div>
+        <span class="icon-close" id="closeChecklist">✕</span>
+      </div>
+    </header>
+    <div style="margin-bottom:8px;">
+      <input id="newChecklistItem" type="text" placeholder="Neues Element hinzufügen" style="width:70%">
+      <button id="addChecklistBtn">+</button>
+    </div>
+    <div class="list" id="checklistItems"></div>
+  </div>
+</div>
+
+<script>
+/* ===========================
+   App state (kept from your working version)
+   =========================== */
+const months = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+
+const plants = [
+  {name:"Hibiskus / Roseneibisch", harvest:false, cut:[6,7]},
+  {name:"Zuckerrohr-Palmen", harvest:false, cut:[5,6]},
+  {name:"Apfelbaum", harvest:true, harvestRange:[8,9], cut:[2,3]},
+  {name:"Kirschbaum", harvest:true, harvestRange:[6,7], cut:[2,3]},
+  {name:"Pflaumenbaum", harvest:true, harvestRange:[8,9], cut:[2,3]},
+  {name:"Johannisbeere", harvest:true, harvestRange:[7,7], cut:[2,3]},
+  {name:"Himbeere", harvest:true, harvestRange:[7,8], cut:[3,4]},
+  {name:"Amerikanische Heidelbeere", harvest:true, harvestRange:[7,8], cut:[2,3]},
+  {name:"Erdbeeren", harvest:true, harvestRange:[6,7], cut:[2,3]},
+  {name:"Fetthenne", harvest:false, cut:[9,10]},
+  {name:"Kürbis", harvest:true, unit:"Stück", harvestRange:[9,10]},
+  {name:"Zucchini", harvest:true, unit:"Stück", harvestRange:[7,8]},
+];
+
+let events = []; // array of "YYYY-MM-DD | label" strings (keeps old display format)
+let notes = [];  // array of {id,text,iso}
+let wateringMap = {}; // { "YYYY-MM-DD": true }
+let winterChecklist = []; // array of {id,text,done}
+
+/* DOM refs */
+const monthLabel = document.getElementById('monthLabel');
+const yearSelect = document.getElementById('yearSelect');
+const calendarGrid = document.getElementById('calendarGrid');
+const eventList = document.getElementById('eventList');
+const notesList = document.getElementById('notesList');
+const noteInput = document.getElementById('noteInput');
+const addNoteBtn = document.getElementById('addNoteBtn');
+const todoList = document.getElementById('todoList');
+const weatherIcon = document.getElementById('weatherIcon');
+const weatherTemp = document.getElementById('weatherTemp');
+const rainProbEl = document.getElementById('rainProb');
+const waterBtn = document.getElementById('waterBtn');
+const winterBtn = document.getElementById('winterBtn');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const checklistItems = document.getElementById('checklistItems');
+const newChecklistItem = document.getElementById('newChecklistItem');
+const addChecklistBtn = document.getElementById('addChecklistBtn');
+const saveChecklist = document.getElementById('saveChecklist');
+const closeChecklist = document.getElementById('closeChecklist');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+const syncStatus = document.getElementById('syncStatus');
+
+let current = new Date();
+let selectedDateISO = null; // YYYY-MM-DD
+
+/* ===========================
+   Firebase setup (replace config)
+   ===========================
+
+  STEPS (kurze Anleitung):
+  1) Gehe zu https://console.firebase.google.com/ und erstelle ein Projekt.
+  2) Aktiviere "Firestore" (Datenbank) - Native Modus.
+  3) In Project settings -> Your apps -> Web app -> Add app, kopiere die firebaseConfig (ersetzt das Platzhalter-Objekt unten).
+  4) Setze unter Firestore Security Rules (nur für erste Tests) temporär:
+       rules_version = '2';
+       service cloud.firestore {
+         match /databases/{database}/documents {
+           match /{document=**} {
+             allow read, write: if true;
+           }
+         }
+       }
+     (Wichtig: Öffne die Regeln später sicherer mit Authentication.)
+  5) Speichere die firebaseConfig in der Datei an der markierten Stelle und lade die Seite neu.
+
+  Hinweis: Dieser Code nutzt anonyme Authentifizierung, damit mehrere Nutzer gleichzeitig schreiben können.
+*/
+
+let useFirestore = false;
+let db = null;
+const firebaseConfig = {
+  apiKey: "AIzaSyB2UunTDA4JBfJIU2kqLnE_O3xQY44lIG0",
+  authDomain: "gartenplaner-ca2cf.firebaseapp.com",
+  projectId: "gartenplaner-ca2cf",
+  storageBucket: "gartenplaner-ca2cf.appspot.com",
+  messagingSenderId: "648271569301",
+  appId: "1:648271569301:web:b3823f824cba58b180169c"
+};;
+
+  // If firebaseConfig is filled (check minimal required fields), initialize
+try {
+  if (firebaseConfig && firebaseConfig.apiKey) {
+    firebase.initializeApp(firebaseConfig);
+    // anonymous auth
+    firebase.auth().signInAnonymously().catch((e)=>{ console.warn('Firebase auth',e); });
+    db = firebase.firestore();
+    useFirestore = true;
+    syncStatus.textContent = 'Verbunden: Firebase (Realtime)';
+    // set up listeners
+    setupFirestoreListeners();
+  } else {
+    syncStatus.textContent = 'Lokaler Modus (kein Firebase konfiguriert)';
+  }
+} catch (err) {
+  console.warn('Firebase init failed', err);
+  syncStatus.textContent = 'Firebase-Fehler (Lokaler Modus)';
+}
+
+/* ===========================
+   Firestore listeners & writes
+   =========================== */
+function setupFirestoreListeners(){
+  if(!db) return;
+
+  // events
+  db.collection('events').orderBy('createdAt','desc').onSnapshot(snap=>{
+    events = [];
+    snap.forEach(doc=>{
+      const d = doc.data();
+      if(d.date && d.text){
+        events.push(`${d.date} | ${d.text}`);
+      }
+    });
+    renderEvents();
+    renderCalendar();
+  });
+
+  // notes
+  db.collection('notes').orderBy('createdAt','desc').onSnapshot(snap=>{
+    notes = [];
+    snap.forEach(doc=>{
+      const d = doc.data();
+      notes.push({ id: doc.id, text: d.text, iso: d.createdAt? d.createdAt.toDate().toISOString() : new Date().toISOString() });
+    });
+    renderNotes();
+  });
+
+  // plants (replace whole local plants if db has docs)
+  db.collection('plants').onSnapshot(snap=>{
+    const ptmp = [];
+    snap.forEach(doc=>{
+      const d = doc.data();
+      ptmp.push(d);
+    });
+    // Only replace if collection not empty (so we keep local defaults otherwise)
+    if(ptmp.length>0){
+      // mutate local plants array to match DB
+      plants.length = 0;
+      ptmp.forEach(p=>plants.push(p));
+      renderPlants();
+      renderTodo();
+      renderCalendar();
+    }
+  });
+
+  // watering markers
+  db.collection('watering').onSnapshot(snap=>{
+    wateringMap = {};
+    snap.forEach(doc=>{
+      const d = doc.data();
+      if(d.date) wateringMap[d.date] = true;
+    });
+    renderCalendar(); // watering icons are drawn in calendar
+  });
+
+  // winter checklist (single doc 'checklist/items' or doc id 'checklist')
+  db.collection('appdata').doc('winterChecklist').onSnapshot(doc=>{
+    const d = doc.data();
+    if(d && Array.isArray(d.items)){
+      winterChecklist = d.items;
+      // If modal open -> render
+      renderChecklistItems();
+    }
+  });
+}
+
+async function saveEventToFirestore(dateISO, text){
+  if(!useFirestore || !db) {
+    // fallback: local events array
+    events.unshift(`${dateISO} | ${text}`);
+    renderEvents(); renderCalendar();
+    return;
+  }
+  try{
+    await db.collection('events').add({ date: dateISO, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }catch(e){ console.warn('saveEvent', e); }
+}
+
+async function toggleWateringFor(dateISO){
+  if(!useFirestore || !db){
+    if(wateringMap[dateISO]){ delete wateringMap[dateISO]; } else { wateringMap[dateISO] = true; }
+    renderCalendar();
+    return;
+  }
+  // check if doc exists with date == dateISO
+  const q = await db.collection('watering').where('date','==',dateISO).get();
+  if(!q.empty){
+    // remove (use first match)
+    const id = q.docs[0].id;
+    await db.collection('watering').doc(id).delete();
+  } else {
+    await db.collection('watering').add({ date: dateISO, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }
+}
+
+/* Winter checklist saves (store as single doc in collection 'appdata' id 'winterChecklist') */
+async function saveChecklistToFirestore(){
+  if(!useFirestore || !db){
+    // local only: nothing special, we set winterChecklist
+    renderChecklistItems();
+    return;
+  }
+  try{
+    await db.collection('appdata').doc('winterChecklist').set({ items: winterChecklist }, { merge:true });
+  }catch(e){ console.warn('saveChecklist', e); }
+}
+
+/* ===========================
+   Utility & rendering
+   =========================== */
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function pad(n){ return String(n).padStart(2,'0'); }
+function isoFor(y,m,d){ return `${y}-${pad(m)}-${pad(d)}`; }
+
+/* Year select */
+function populateYears(){
+  const y = new Date().getFullYear();
+  yearSelect.innerHTML = '';
+  for(let i=y-5;i<=y+5;i++){
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = i;
+    if(i===current.getFullYear()) opt.selected = true;
+    yearSelect.appendChild(opt);
+  }
+}
+populateYears();
+
+/* Calendar rendering + selection + watering icons */
+function renderCalendar(){
+  calendarGrid.innerHTML = '';
+  const y = current.getFullYear();
+  const m = current.getMonth();
+  monthLabel.textContent = current.toLocaleString('de-DE',{month:'long', year:'numeric'});
+
+  const firstDate = new Date(y,m,1);
+  const offset = (firstDate.getDay() + 6) % 7;
+  for(let i=0;i<offset;i++){
+    const blank = document.createElement('div');
+    blank.className = 'day';
+    blank.style.background='transparent';
+    calendarGrid.appendChild(blank);
+  }
+
+  const daysInMonth = new Date(y,m+1,0).getDate();
+  for(let d=1; d<=daysInMonth; d++){
+    const cell = document.createElement('div');
+    cell.className = 'day';
+    const num = document.createElement('div'); num.className='num'; num.textContent = d+'.';
+    cell.appendChild(num);
+    const iso = isoFor(y,m+1,d);
+
+    // show event chips (existing format "YYYY-MM-DD | text")
+    events.forEach(ev=>{
+      if(typeof ev === 'string' && ev.startsWith(iso + ' | ')){
+        const txt = ev.split(' | ')[1] || ev;
+        const chip = document.createElement('div');
+        chip.className = 'event-chip ' + (txt.toLowerCase().includes('ernte') ? 'chip-harvest' : 'chip-prune');
+        chip.textContent = txt;
+        cell.appendChild(chip);
+      }
+    });
+
+    // watering icon
+    if(wateringMap[iso]){
+      const w = document.createElement('span');
+      w.className = 'watering-icon';
+      w.title = 'Gegossen';
+      w.textContent = '💧';
+      cell.appendChild(w);
+    }
+
+    // selection behavior
+    cell.addEventListener('click', ()=>{
+      // clear prev selection
+      document.querySelectorAll('.day.selected').forEach(el=>el.classList.remove('selected'));
+      cell.classList.add('selected');
+      selectedDateISO = iso;
+    });
+
+    calendarGrid.appendChild(cell);
+  }
+  renderTodo(); // update ToDo on calendar render
+}
+
+/* Events & notes rendering */
+function renderEvents(){
+  eventList.innerHTML = '';
+  events.forEach(e=>{
+    const div = document.createElement('div'); div.className='item';
+    const [date,txt] = e.split(' | ');
+    div.innerHTML = `<div style="font-weight:600">${txt}</div><div class="small" style="color:var(--muted)">${date}</div>`;
+    eventList.appendChild(div);
+  });
+}
+
+function renderNotes(){
+  notesList.innerHTML = '';
+  notes.slice().reverse().forEach(n=>{
+    const div = document.createElement('div'); div.className='item';
+    const txt = document.createElement('div'); txt.textContent = n.text;
+    const meta = document.createElement('div'); meta.className='small'; meta.style.color='var(--muted)';
+    meta.textContent = new Date(n.iso).toLocaleString('de-DE');
+    const del = document.createElement('button'); del.textContent='×'; del.style.marginLeft='8px';
+    del.onclick = async ()=> {
+      if(useFirestore && db){
+        // delete by text+iso approximation (simple approach): find doc with same iso
+        const q = await db.collection('notes').where('createdAt','!=', null).get().catch(()=>null);
+        // fallback: just remove locally
+      }
+      notes = notes.filter(x=>x.id!==n.id);
+      renderNotes(); renderCalendar();
+    };
+    div.appendChild(txt); div.appendChild(meta); div.appendChild(del);
+    notesList.appendChild(div);
+  });
+}
+
+/* ToDo generation */
+function renderTodo(){
+  todoList.innerHTML = '';
+  const month = current.getMonth() + 1;
+  plants.forEach(p=>{
+    if(Array.isArray(p.harvestRange) && p.harvestRange.length>=2){
+      const [from,to] = p.harvestRange;
+      const inRange = from <= to ? (month>=from && month<=to) : (month>=from || month<=to);
+      if(inRange){
+        const el = document.createElement('div'); el.className='todo-item'; el.textContent = p.name + ' - Ernte fällig';
+        todoList.appendChild(el);
+      }
+    }
+    if(Array.isArray(p.cut) && p.cut.length>=2){
+      const [from,to] = p.cut;
+      const inRange = from <= to ? (month>=from && month<=to) : (month>=from || month<=to);
+      if(inRange){
+        const el = document.createElement('div'); el.className='todo-item'; el.textContent = p.name + ' - Zuschnitt fällig';
+        todoList.appendChild(el);
+      }
+    }
+  });
+}
+
+/* Plants rendering (collapsible) */
+const plantArea = document.getElementById('plantArea');
+const plantAdd = document.getElementById('plantAdd');
+const plantsToggle = document.getElementById('plantsToggle');
+
+function renderPlants(){
+  plantArea.innerHTML = '';
+  plants.forEach((p, idx)=>{
+    const box = document.createElement('div'); box.className='plant-box';
+    const title = document.createElement('div'); title.style.fontWeight='700'; title.textContent = p.name; box.appendChild(title);
+
+    // cut
+    const cutSec = document.createElement('div'); cutSec.className='plant-section';
+    const cutLabel = document.createElement('label');
+    const cutCb = document.createElement('input'); cutCb.type='checkbox';
+    let cutState = 0;
+    cutCb.addEventListener('click', ()=>{
+      cutState++;
+      if(cutState===1){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Zuschnitt in Arbeit`); }
+      else if(cutState===2){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Zuschnitt erledigt`); cutCb.disabled=true; }
+    });
+    cutLabel.appendChild(cutCb); cutLabel.append(' erledigt'); cutSec.appendChild(cutLabel);
+
+    // cut period selects
+    const fromSel = document.createElement('select'); const toSel = document.createElement('select');
+    const emptyOpt = document.createElement('option'); emptyOpt.value=''; emptyOpt.text='-'; fromSel.appendChild(emptyOpt.cloneNode(true)); toSel.appendChild(emptyOpt.cloneNode(true));
+    for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent = months[i-1]; if(p.cut && p.cut[0]===i) o.selected=true; fromSel.appendChild(o); const o2=o.cloneNode(true); if(p.cut && p.cut[1]===i) o2.selected=true; toSel.appendChild(o2); }
+    const periodWrap = document.createElement('div'); periodWrap.style.marginTop='6px'; periodWrap.append('Zeitraum: '); periodWrap.appendChild(fromSel); periodWrap.append(' bis '); periodWrap.appendChild(toSel);
+    fromSel.addEventListener('change', ()=>{ p.cut = [ Number(fromSel.value)||null, Number(toSel.value)||null ]; renderCalendar(); renderTodo(); });
+    toSel.addEventListener('change', ()=>{ p.cut = [ Number(fromSel.value)||null, Number(toSel.value)||null ]; renderCalendar(); renderTodo(); });
+
+    cutSec.appendChild(periodWrap);
+    box.appendChild(cutSec);
+
+    // harvest
+    const harvSec = document.createElement('div'); harvSec.className='plant-section';
+    const harvEnableLbl = document.createElement('label');
+    const harvEnable = document.createElement('input'); harvEnable.type='checkbox';
+    harvEnable.checked = !!p.harvest;
+    harvEnable.addEventListener('change', ()=>{ p.harvest = harvEnable.checked; renderPlants(); renderTodo(); });
+    harvEnableLbl.appendChild(harvEnable); harvEnableLbl.append(' Ernte aktivieren');
+    harvSec.appendChild(harvEnableLbl);
+
+    if(p.harvest){
+      const harvDoneLabel = document.createElement('label');
+      const harvCb = document.createElement('input'); harvCb.type='checkbox';
+      let harvState = 0;
+      const amount = document.createElement('input'); amount.type='number'; amount.placeholder = p.unit || 'kg';
+      harvCb.addEventListener('click', ()=>{
+        harvState++;
+        if(harvState===1){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Ernte in Arbeit`); }
+        else if(harvState===2){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Ernte erledigt ${amount.value||''} ${p.unit||'kg'}`); harvCb.disabled=true; }
+      });
+      harvDoneLabel.appendChild(harvCb); harvDoneLabel.append(' erledigt'); harvSec.appendChild(harvDoneLabel);
+
+      // harvest range selects
+      const hf = document.createElement('select'); const ht = document.createElement('select');
+      hf.appendChild(emptyOpt.cloneNode(true)); ht.appendChild(emptyOpt.cloneNode(true));
+      for(let i=1;i<=12;i++){ const o=document.createElement('option'); o.value=i; o.textContent = months[i-1]; if(p.harvestRange && p.harvestRange[0]===i) o.selected=true; hf.appendChild(o); const o2=o.cloneNode(true); if(p.harvestRange && p.harvestRange[1]===i) o2.selected=true; ht.appendChild(o2); }
+      hf.addEventListener('change', ()=>{ p.harvestRange = [ Number(hf.value)||null, Number(ht.value)||null ]; renderTodo(); });
+      ht.addEventListener('change', ()=>{ p.harvestRange = [ Number(hf.value)||null, Number(ht.value)||null ]; renderTodo(); });
+
+      const harvRangeWrap = document.createElement('div');
+      harvRangeWrap.append('Zeitraum: '); harvRangeWrap.appendChild(hf); harvRangeWrap.append(' bis '); harvRangeWrap.appendChild(ht);
+      harvSec.appendChild(harvRangeWrap);
+      harvSec.appendChild(document.createElement('br'));
+      harvSec.appendChild(amount);
+    }
+
+    const del = document.createElement('button'); del.textContent = 'Pflanze löschen'; del.style.marginTop = '8px';
+    del.addEventListener('click', ()=>{ plants.splice(idx,1); renderPlants(); renderCalendar(); renderTodo(); });
+
+    box.appendChild(harvSec);
+    box.appendChild(del);
+    plantArea.appendChild(box);
+  });
+}
+
+/* toggle plants UI */
+const toggleBtn = document.getElementById('plantsToggle');
+toggleBtn.addEventListener('click', ()=>{
+  const visible = !plantArea.classList.contains('hidden');
+  if(visible){
+    plantArea.classList.add('hidden'); plantAdd.classList.add('hidden'); toggleBtn.textContent = '▼ Pflanzen anzeigen';
+  } else {
+    plantArea.classList.remove('hidden'); plantAdd.classList.remove('hidden'); toggleBtn.textContent = '▲ Pflanzen verbergen';
+    renderPlants();
+  }
+});
+
+/* add plant */
+document.getElementById('addPlantBtn').addEventListener('click', ()=>{
+  const name = document.getElementById('newPlantName').value.trim();
+  if(!name) return;
+  plants.push({ name, harvest:true, harvestRange:null, cut:null });
+  document.getElementById('newPlantName').value = '';
+  renderPlants();
+  renderTodo();
+});
+
+/* export / import (keeps existing behavior) */
+exportBtn.addEventListener('click', ()=>{
+  const payload = { plants, events, notes };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `garten-dashboard-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href);
+});
+importBtn.addEventListener('click', ()=> importFile.click());
+importFile.addEventListener('change', (e)=>{
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=> {
+    try{
+      const data = JSON.parse(r.result);
+      if(Array.isArray(data.plants)) { plants.length = 0; data.plants.forEach(p => plants.push(p)); }
+      events = Array.isArray(data.events) ? data.events.slice() : [];
+      notes = Array.isArray(data.notes) ? data.notes.slice() : [];
+      renderPlants(); renderCalendar(); renderEvents(); renderNotes(); renderTodo();
+      alert('Import erfolgreich.');
+      // optionally push imported data to Firestore if enabled:
+      if(useFirestore && db){
+        // push plants (clear collection then add) - careful: destructive
+        // For now we will not auto-overwrite DB on import to avoid destructive sync.
+      }
+    }catch(err){ alert('Import fehlgeschlagen: ' + err.message); }
+  };
+  r.readAsText(f);
+});
+
+/* Weather (robust loader, auto-refresh) */
+async function loadWeather(){
+  try {
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=48.408&longitude=10.0375&daily=precipitation_probability_mean,precipitation_sum,temperature_2m_min,sunshine_duration,windspeed_10m_max&current_weather=true&timezone=Europe%2FBerlin';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    const cw = data.current_weather || {};
+    if (cw.temperature !== undefined) weatherTemp.textContent = Math.round(cw.temperature) + '°C'; else weatherTemp.textContent = '—°C';
+    const code = Number(cw.weathercode ?? -1);
+    if(code >= 0){
+      if(code < 3) weatherIcon.src = 'https://img.icons8.com/ios-filled/50/000000/sun.png';
+      else if(code < 61) weatherIcon.src = 'https://img.icons8.com/ios-filled/50/000000/partly-cloudy-day.png';
+      else weatherIcon.src = 'https://img.icons8.com/ios-filled/50/000000/rain.png';
+    } else weatherIcon.src = '';
+
+    // rain probability
+    const probArr = data.daily?.precipitation_probability_mean;
+    const prob = Array.isArray(probArr) && probArr.length > 0 ? Math.round(probArr[0]) : null;
+    rainProbEl.textContent = prob !== null ? 'Regenwahrscheinlichkeit: ' + prob + '%' : 'Regenwahrscheinlichkeit: —%';
+
+    // water hint (today + tomorrow precipitation sum)
+    const precArr = data.daily?.precipitation_sum || [];
+    const rainToday = Number(precArr[0] ?? 0);
+    const rainTomorrow = Number(precArr[1] ?? 0);
+    document.getElementById('waterHint').textContent = 'Gießhinweis: ' + ((rainToday + rainTomorrow) < 1 ? 'Gießen empfohlen' : 'Kein Gießen nötig');
+
+    // frost
+    const tminArr = data.daily?.temperature_2m_min;
+    const tmin = Array.isArray(tminArr) && tminArr.length>0 ? Number(tminArr[0]) : null;
+    document.getElementById('frostWarn').textContent = 'Frostwarnung: ' + ((tmin !== null && tmin < 2) ? 'Achtung: Bodenfrost möglich!' : 'Kein Frost erwartet');
+
+    // sun hours
+    const sunArr = data.daily?.sunshine_duration;
+    let sunHours = '—';
+    if(Array.isArray(sunArr) && sunArr.length > 0){
+      let v = Number(sunArr[0]);
+      if(isFinite(v)){
+        if(v > 24) v = v / 3600;
+        sunHours = (Math.round(v*10)/10) + 'h';
+      }
+    }
+    document.getElementById('sunHours').textContent = 'Sonnenstunden: ' + sunHours;
+
+    // wind
+    const windArr = data.daily?.windspeed_10m_max;
+    const windVal = (Array.isArray(windArr) && windArr.length>0) ? Number(windArr[0]) : (cw.windspeed ?? null);
+    const windText = (windVal === null) ? '—' : (windVal > 50 ? 'Sturmwarnung! (' + windVal + ' km/h)' : windVal + ' km/h');
+    document.getElementById('windWarn').textContent = 'Wind: ' + windText;
+
+    // pollen (separate call)
+    try{
+      const pRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.408&longitude=10.0375&daily=alder_pollen,birch_pollen,grass_pollen,ragweed_pollen&timezone=Europe%2FBerlin');
+      if(pRes.ok){
+        const pData = await pRes.json();
+        const grass = pData.daily?.grass_pollen;
+        let pollenText = '—';
+        if(Array.isArray(grass) && grass.length>0){
+          const val = Number(grass[0]);
+          const labels = ['keine Belastung','gering','mittel','hoch'];
+          pollenText = labels[val] ?? String(val);
+        }
+        document.getElementById('pollenInfo').textContent = 'Pollenflug (Gräser): ' + pollenText;
+      } else document.getElementById('pollenInfo').textContent = 'Pollenflug: —';
+    }catch(pErr){
+      document.getElementById('pollenInfo').textContent = 'Pollenflug: —';
+      console.warn('Pollen-API Fehler', pErr);
+    }
+
+    // ensure weather box opens wetter.com (single handler)
+    const wb = document.getElementById('weatherBox');
+    if(wb) wb.onclick = () => window.open('https://www.wetter.com/wetter/pfuhl/DE0004144.html','_blank');
+
+  } catch(err){
+    console.warn('Fehler beim Laden der Wetterdaten:', err);
+    weatherTemp.textContent = '—°C';
+    rainProbEl.textContent = 'Regenwahrscheinlichkeit: —%';
+    document.getElementById('waterHint').textContent = 'Gießhinweis: —';
+    document.getElementById('frostWarn').textContent = 'Frostwarnung: —';
+    document.getElementById('sunHours').textContent = 'Sonnenstunden: —';
+    document.getElementById('windWarn').textContent = 'Wind: —';
+    document.getElementById('pollenInfo').textContent = 'Pollenflug: —';
+  }
+}
+// initial + refresh
+loadWeather();
+setInterval(loadWeather, 20 * 60 * 1000);
+
+/* ===== initial render & controls ===== */
+function renderAll(){
+  renderCalendar();
+  renderEvents();
+  renderNotes();
+  renderPlants();
+}
+renderAll();
+
+document.getElementById('prevMonth').addEventListener('click', ()=>{ current.setMonth(current.getMonth()-1); renderCalendar(); });
+document.getElementById('nextMonth').addEventListener('click', ()=>{ current.setMonth(current.getMonth()+1); renderCalendar(); });
+yearSelect.addEventListener('change', ()=>{ current.setFullYear(Number(yearSelect.value)); renderCalendar(); });
+
+/* Add note */
+addNoteBtn.addEventListener('click', ()=>{
+  const v = noteInput.value.trim(); if(!v) return;
+  noteInput.value = '';
+  // save to Firestore (or local)
+  saveNoteToFirestore(v);
+});
+
+/* save note */
+async function saveNoteToFirestore(text){
+  if(!useFirestore || !db){
+    notes.push({ id: uid(), text, iso: new Date().toISOString() });
+    renderNotes(); return;
+  }
+  try{
+    await db.collection('notes').add({ text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+  }catch(e){ console.warn('saveNote', e); }
+}
+
+/* add event for today helper */
+function addEventForToday(label){
+  const now = new Date();
+  const iso = isoFor(now.getFullYear(), now.getMonth()+1, now.getDate());
+  saveEventToFirestore(iso, label);
+}
+
+/* saveEventToFirestore implemented above */
+
+/* Water button behavior */
+waterBtn.addEventListener('click', async ()=>{
+  if(!selectedDateISO){
+    alert('Bitte zunächst ein Datum im Kalender auswählen, auf das du das Gießen setzen möchtest.');
+    return;
+  }
+  await toggleWateringFor(selectedDateISO);
+});
+
+/* toggleWateringFor implemented above */
+
+/* Winter checklist modal controls */
+winterBtn.addEventListener('click', ()=>{
+  modalBackdrop.classList.remove('hidden'); modalBackdrop.style.display='flex';
+  renderChecklistItems();
+});
+closeChecklist.addEventListener('click', ()=>{ modalBackdrop.classList.add('hidden'); modalBackdrop.style.display='none'; });
+
+function renderChecklistItems(){
+  checklistItems.innerHTML = '';
+  (winterChecklist || []).forEach((it, idx)=>{
+    const row = document.createElement('div'); row.className='row';
+    const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!it.done;
+    cb.addEventListener('change', async ()=>{ winterChecklist[idx].done = cb.checked; await saveChecklistToFirestore(); renderChecklistItems(); });
+    const label = document.createElement('div'); label.style.flex='1'; label.textContent = it.text;
+    const del = document.createElement('button'); del.textContent='×'; del.addEventListener('click', async ()=>{ winterChecklist.splice(idx,1); await saveChecklistToFirestore(); renderChecklistItems(); });
+    row.appendChild(cb); row.appendChild(label); row.appendChild(del);
+    checklistItems.appendChild(row);
+  });
+}
+addChecklistBtn.addEventListener('click', async ()=>{ const v = newChecklistItem.value.trim(); if(!v) return; winterChecklist.push({ id: uid(), text:v, done:false }); newChecklistItem.value=''; await saveChecklistToFirestore(); renderChecklistItems(); });
+saveChecklist.addEventListener('click', async ()=>{ await saveChecklistToFirestore(); alert('Checkliste gespeichert.'); });
+
+/* Firestore initial fetch of checklist if firestore used */
+async function loadChecklistFromFirestore(){
+  if(!useFirestore || !db) return;
+  try{
+    const doc = await db.collection('appdata').doc('winterChecklist').get();
+    if(doc.exists){ const d = doc.data(); if(d && Array.isArray(d.items)) winterChecklist = d.items; }
+    renderChecklistItems();
+  }catch(e){ console.warn('loadChecklist', e); }
+}
+loadChecklistFromFirestore();
+
+/* Toggle plants UI already implemented earlier */
+
+/* Basic helpers for local fallback already in code */
+
+/* end of script */
+</script>
 </body>
 </html>
