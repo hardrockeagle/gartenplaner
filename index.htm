@@ -23,7 +23,7 @@
     margin:0;
     font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial;
     color:#0f172a;
-    background: linear-gradient(135deg, rgba(212,244,222,0.95), rgba(238,249,240,0.92));
+    background: linear-gradient(135deg, rgba(212,244,222,1), rgba(238,249,240,1));
     -webkit-font-smoothing:antialiased;
     padding-bottom:24px;
   }
@@ -45,11 +45,9 @@
   .weather-divider{ width:60%; height:1px; background: rgba(6,95,70,0.08); border-radius:2px; }
   .rain-prob{ font-size:0.9rem; color:var(--muted); }
 
-  /* new top boxes wrapper (water + winter) */
-  .topBoxes{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
-  .miniBox{ min-width:160px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:10px; border-radius:12px; }
-  #waterBox .btn, #winterBox .btn { padding:8px 10px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(180deg,#ffffff,#f1f8f1); }
-  .iconSmall{ font-size:18px; margin-right:6px; vertical-align:middle; }
+  .topBoxes{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .miniBox{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:14px; border-radius:12px; text-align:center; cursor:pointer; }
+  .miniBox svg{ width:28px; height:28px; stroke:#065f46; }
 
   .todo-list{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
   .todo-item{ background: rgba(255,255,255,0.5); border-radius:10px; padding:8px; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center; }
@@ -84,16 +82,6 @@
   input[type="text"], input[type="number"], select{ padding:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); font-size:14px; width:100%; background: rgba(255,255,255,0.9); }
   .small{ font-size:13px; color:var(--muted); }
   .hidden{ display:none!important; }
-
-  /* modal */
-  .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.4); display:flex; align-items:center; justify-content:center; z-index:2000; }
-  .modal{ background: rgba(255,255,255,0.95); border-radius:12px; padding:14px; max-width:520px; width:92%; box-shadow:0 12px 40px rgba(2,6,23,0.15); }
-  .modal header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .modal .list{ max-height:320px; overflow:auto; }
-  .modal .list .row{ display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; background:rgba(245,250,245,1); margin-bottom:6px; }
-  .modal .controls{ display:flex; gap:8px; align-items:center; }
-  .icon-save{ color:var(--accent-green); font-weight:700; cursor:pointer; }
-  .icon-close{ cursor:pointer; font-weight:700; }
 </style>
 </head>
 <body>
@@ -120,8 +108,6 @@
 
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="rainProb" class="rain-prob">Regenwahrscheinlichkeit: —%</div>
-
-    <!-- NEW: separator + extra infos -->
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="waterHint" class="rain-prob">Gießhinweis: —</div>
     <div class="weather-divider" aria-hidden="true"></div>
@@ -142,92 +128,32 @@
 
   <!-- NEW TOP BOXES: Gießen + Winter-Checkliste -->
   <div class="topBoxes">
-    <div class="glass miniBox" id="waterBox" style="flex:0 1 220px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="waterBtn" class="btn" title="Gießen für ausgewählten Tag (klicken um umzuschalten)">
-          <span class="iconSmall">💧</span> Gießen
-        </button>
-      </div>
-      <div class="small" style="text-align:center">Markiert im Kalender, wenn für einen Tag gegossen wurde.</div>
+    <div class="glass miniBox" id="waterBox">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.485-8.485l-.707.707M4.222 4.222l.707.707M21 12h1M2 12H1m16.071 6.071l-.707-.707M6.343 6.343l-.707-.707" />
+      </svg>
+      <div class="small">Vorab Tag im Kalender auswählen</div>
     </div>
 
-    <div class="glass miniBox" id="winterBox" style="flex:0 1 280px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="winterBtn" class="btn" title="Winter-Checkliste öffnen">
-          <span class="iconSmall">🗒️</span> Winter-Checkliste
-        </button>
-      </div>
-      <div class="small" style="text-align:center">Öffne eine anpassbare Checkliste (Popup).</div>
+    <div class="glass miniBox" id="winterBox">
+      <div><strong>Winter-Checkliste ▼</strong></div>
+      <div class="small">Anpassbare Checkliste öffnen</div>
     </div>
   </div>
 
-  <!-- Main -->
-  <div class="mainGrid">
-    <div class="glass calendar-area">
-      <div class="cal-controls">
-        <div class="left"><button class="cal-btn" id="prevMonth">‹</button></div>
-        <div class="center"><div class="month-year" id="monthLabel">Monat</div><select id="yearSelect" class="small"></select></div>
-        <div class="right"><button class="cal-btn" id="nextMonth">›</button></div>
-      </div>
-
-      <div class="dow-row" id="dowRow">
-        <div class="dow">Mo</div><div class="dow">Di</div><div class="dow">Mi</div><div class="dow">Do</div><div class="dow">Fr</div><div class="dow">Sa</div><div class="dow">So</div>
-      </div>
-
-      <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
-    </div>
-
-    <aside class="rightCol">
-      <div class="glass events">
-        <h3 style="margin:0 0 8px 0;">Ereignis-Liste</h3>
-        <div id="eventList" class="small"></div>
-      </div>
-
-      <div class="glass notes">
-        <h3 style="margin:0 0 8px 0;">Notizen</h3>
-        <div style="display:flex; gap:8px; margin-bottom:8px;">
-          <input id="noteInput" type="text" placeholder="Notiz eingeben…" />
-          <button id="addNoteBtn">Hinzufügen</button>
-        </div>
-        <div id="notesList" class="small"></div>
-      </div>
-    </aside>
-  </div>
-
-  <!-- Plants collapsible -->
-  <div class="glass" id="plantsSection">
+  <!-- Expandable Winter Checklist -->
+  <div id="winterChecklistArea" class="glass hidden">
     <div class="plants-header">
-      <h3 style="margin:0">Pflanzen</h3>
-      <button class="toggle-btn" id="plantsToggle">▼ Pflanzen anzeigen</button>
+      <h3 style="margin:0">Winter-Checkliste</h3>
+      <button id="winterToggle" class="toggle-btn">▲ Verbergen</button>
     </div>
-
-    <div id="plantArea" class="plants-grid hidden" aria-hidden="true"></div>
-    <div id="plantAdd" class="hidden" style="margin-top:8px;">
-      <input id="newPlantName" type="text" placeholder="Neue Pflanze Name" />
-      <div style="margin-top:8px;"><button id="addPlantBtn">Hinzufügen</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- Winter checklist modal (hidden by default) -->
-<div id="modalBackdrop" class="hidden" aria-hidden="true">
-  <div class="modal">
-    <header>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <span class="icon-save" id="saveChecklist" title="Speichern">💾</span>
-        <strong>Winter-Checkliste</strong>
-      </div>
-      <div>
-        <span class="icon-close" id="closeChecklist">✕</span>
-      </div>
-    </header>
     <div style="margin-bottom:8px;">
       <input id="newChecklistItem" type="text" placeholder="Neues Element hinzufügen" style="width:70%">
       <button id="addChecklistBtn">+</button>
     </div>
-    <div class="list" id="checklistItems"></div>
+    <div id="checklistItems"></div>
   </div>
-</div>
+
 
 <script>
 /* ===========================
@@ -889,3 +815,4 @@ loadChecklistFromFirestore();
 </script>
 </body>
 </html>
+
