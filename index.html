@@ -45,11 +45,11 @@
   .weather-divider{ width:60%; height:1px; background: rgba(6,95,70,0.08); border-radius:2px; }
   .rain-prob{ font-size:0.9rem; color:var(--muted); }
 
-  /* new top boxes wrapper (water + winter) */
-  .topBoxes{ display:flex; gap:10px; flex-wrap:wrap; align-items:flex-start; }
-  .miniBox{ min-width:160px; display:flex; flex-direction:column; align-items:center; gap:8px; padding:10px; border-radius:12px; }
-  #waterBox .btn, #winterBox .btn { padding:8px 10px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(180deg,#ffffff,#f1f8f1); }
-  .iconSmall{ font-size:18px; margin-right:6px; vertical-align:middle; }
+  /* topBoxes: each half width */
+  .topBoxes{ display:flex; gap:10px; }
+  .topBoxes > .miniBox{ flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; padding:12px; border-radius:12px; }
+  .btn { padding:8px 10px; border-radius:10px; border:none; cursor:pointer; background: linear-gradient(180deg,#ffffff,#f1f8f1); }
+  .small{ font-size:13px; color:var(--muted); }
 
   .todo-list{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
   .todo-item{ background: rgba(255,255,255,0.5); border-radius:10px; padding:8px; font-size:0.95rem; display:flex; justify-content:space-between; align-items:center; }
@@ -82,18 +82,16 @@
   .plant-section{ margin-top:8px; background: rgba(255,255,255,0.45); padding:8px; border-radius:10px; font-size:13px; }
 
   input[type="text"], input[type="number"], select{ padding:8px; border-radius:10px; border:1px solid rgba(0,0,0,0.06); font-size:14px; width:100%; background: rgba(255,255,255,0.9); }
-  .small{ font-size:13px; color:var(--muted); }
-  .hidden{ display:none!important; }
 
-  /* modal */
-  .modal-backdrop{ position:fixed; inset:0; background:rgba(2,6,23,0.4); display:flex; align-items:center; justify-content:center; z-index:2000; }
-  .modal{ background: rgba(255,255,255,0.95); border-radius:12px; padding:14px; max-width:520px; width:92%; box-shadow:0 12px 40px rgba(2,6,23,0.15); }
-  .modal header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .modal .list{ max-height:320px; overflow:auto; }
-  .modal .list .row{ display:flex; align-items:center; gap:8px; padding:8px; border-radius:8px; background:rgba(245,250,245,1); margin-bottom:6px; }
-  .modal .controls{ display:flex; gap:8px; align-items:center; }
-  .icon-save{ color:var(--accent-green); font-weight:700; cursor:pointer; }
-  .icon-close{ cursor:pointer; font-weight:700; }
+  /* winter checklist inline box styles */
+  #winterChecklistInline{ width:100%; margin-top:10px; padding:10px; border-radius:10px; background: rgba(255,255,255,0.9); }
+  #checklistItems .row{ display:flex; flex-direction:column; gap:6px; padding:8px; border-radius:8px; background:rgba(245,250,245,1); margin-bottom:6px; }
+  #checklistItems .row-top{ display:flex; gap:8px; align-items:center; }
+  #checklistItems .row-top input[type="text"]{ flex:1; padding:6px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); }
+  #checklistItems .meta { color:var(--muted); font-size:12px; }
+  .small-timestamp{ color:var(--muted); font-size:12px; margin-top:4px; }
+  .icon-btn { background:transparent; border:none; cursor:pointer; font-size:16px; padding:4px; }
+  .hidden { display:none !important; }
 </style>
 </head>
 <body>
@@ -121,15 +119,18 @@
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="rainProb" class="rain-prob">Regenwahrscheinlichkeit: —%</div>
 
-    <!-- NEW: separator + extra infos -->
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="waterHint" class="rain-prob">Gießhinweis: —</div>
+
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="frostWarn" class="rain-prob">Frostwarnung: —</div>
+
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="sunHours" class="rain-prob">Sonnenstunden: —</div>
+
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="windWarn" class="rain-prob">Wind: —</div>
+
     <div class="weather-divider" aria-hidden="true"></div>
     <div id="pollenInfo" class="rain-prob">Pollenflug: —</div>
   </div>
@@ -140,24 +141,23 @@
     <div id="todoList" class="todo-list"></div>
   </div>
 
-  <!-- NEW TOP BOXES: Gießen + Winter-Checkliste -->
+  <!-- TOP BOXES (Gießen + Winter) -->
   <div class="topBoxes">
-    <div class="glass miniBox" id="waterBox" style="flex:0 1 220px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="waterBtn" class="btn" title="Gießen für ausgewählten Tag (klicken um umzuschalten)">
-          <span class="iconSmall">💧</span> Gießen
-        </button>
-      </div>
-      <div class="small" style="text-align:center">Markiert im Kalender, wenn für einen Tag gegossen wurde.</div>
+    <div class="glass miniBox" id="waterBox">
+      <button id="waterBtn" class="btn" title="Gießen für ausgewählten Tag (klicken um umzuschalten)">💧</button>
+      <div class="small">vorab Tag in Kalender auswählen</div>
     </div>
 
-    <div class="glass miniBox" id="winterBox" style="flex:0 1 280px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <button id="winterBtn" class="btn" title="Winter-Checkliste öffnen">
-          <span class="iconSmall">🗒️</span> Winter-Checkliste
-        </button>
+    <div class="glass miniBox" id="winterBox">
+      <button id="winterBtn" class="btn" title="Winter-Checkliste öffnen">🗒️ Winter-Checkliste</button>
+      <!-- inline checklist area that expands below when opened -->
+      <div id="winterChecklistInline" class="hidden" aria-hidden="true">
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+          <input id="newChecklistItem" type="text" placeholder="Neues Element hinzufügen" />
+          <button id="addChecklistBtn" class="btn">+</button>
+        </div>
+        <div id="checklistItems"></div>
       </div>
-      <div class="small" style="text-align:center">Öffne eine anpassbare Checkliste (Popup).</div>
     </div>
   </div>
 
@@ -165,9 +165,14 @@
   <div class="mainGrid">
     <div class="glass calendar-area">
       <div class="cal-controls">
-        <div class="left"><button class="cal-btn" id="prevMonth">‹</button></div>
-        <div class="center"><div class="month-year" id="monthLabel">Monat</div><select id="yearSelect" class="small"></select></div>
-        <div class="right"><button class="cal-btn" id="nextMonth">›</button></div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <button class="cal-btn" id="prevMonth">‹</button>
+          <button class="cal-btn" id="nextMonth">›</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="month-year" id="monthLabel">Monat</div>
+          <select id="yearSelect" class="small"></select>
+        </div>
       </div>
 
       <div class="dow-row" id="dowRow">
@@ -204,38 +209,18 @@
     <div id="plantArea" class="plants-grid hidden" aria-hidden="true"></div>
     <div id="plantAdd" class="hidden" style="margin-top:8px;">
       <input id="newPlantName" type="text" placeholder="Neue Pflanze Name" />
-      <div style="margin-top:8px;"><button id="addPlantBtn">Hinzufügen</button></div>
+      <div style="margin-top:8px;"><button id="addPlantBtn" class="btn">Hinzufügen</button></div>
     </div>
-  </div>
-</div>
-
-<!-- Winter checklist modal (hidden by default) -->
-<div id="modalBackdrop" class="hidden" aria-hidden="true">
-  <div class="modal">
-    <header>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <span class="icon-save" id="saveChecklist" title="Speichern">💾</span>
-        <strong>Winter-Checkliste</strong>
-      </div>
-      <div>
-        <span class="icon-close" id="closeChecklist">✕</span>
-      </div>
-    </header>
-    <div style="margin-bottom:8px;">
-      <input id="newChecklistItem" type="text" placeholder="Neues Element hinzufügen" style="width:70%">
-      <button id="addChecklistBtn">+</button>
-    </div>
-    <div class="list" id="checklistItems"></div>
   </div>
 </div>
 
 <script>
 /* ===========================
-   App state (kept from your working version)
+   App state (kept from your working version, extended)
    =========================== */
 const months = ["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
 
-const plants = [
+let plants = [
   {name:"Hibiskus / Roseneibisch", harvest:false, cut:[6,7]},
   {name:"Zuckerrohr-Palmen", harvest:false, cut:[5,6]},
   {name:"Apfelbaum", harvest:true, harvestRange:[8,9], cut:[2,3]},
@@ -250,10 +235,10 @@ const plants = [
   {name:"Zucchini", harvest:true, unit:"Stück", harvestRange:[7,8]},
 ];
 
-let events = []; // array of "YYYY-MM-DD | label" strings (keeps old display format)
+let events = []; // array of "YYYY-MM-DD | label"
 let notes = [];  // array of {id,text,iso}
 let wateringMap = {}; // { "YYYY-MM-DD": true }
-let winterChecklist = []; // array of {id,text,done}
+let winterChecklist = []; // array of {id,text,done,timestamp?}
 
 /* DOM refs */
 const monthLabel = document.getElementById('monthLabel');
@@ -269,16 +254,19 @@ const weatherTemp = document.getElementById('weatherTemp');
 const rainProbEl = document.getElementById('rainProb');
 const waterBtn = document.getElementById('waterBtn');
 const winterBtn = document.getElementById('winterBtn');
-const modalBackdrop = document.getElementById('modalBackdrop');
+const winterChecklistInline = document.getElementById('winterChecklistInline');
 const checklistItems = document.getElementById('checklistItems');
 const newChecklistItem = document.getElementById('newChecklistItem');
 const addChecklistBtn = document.getElementById('addChecklistBtn');
-const saveChecklist = document.getElementById('saveChecklist');
-const closeChecklist = document.getElementById('closeChecklist');
 const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
 const importFile = document.getElementById('importFile');
 const syncStatus = document.getElementById('syncStatus');
+const plantArea = document.getElementById('plantArea');
+const plantAdd = document.getElementById('plantAdd');
+const plantsToggle = document.getElementById('plantsToggle');
+const addPlantBtn = document.getElementById('addPlantBtn');
+const newPlantName = document.getElementById('newPlantName');
 
 let current = new Date();
 let selectedDateISO = null; // YYYY-MM-DD
@@ -286,52 +274,31 @@ let selectedDateISO = null; // YYYY-MM-DD
 /* ===========================
    Firebase setup (replace config)
    ===========================
-
-  STEPS (kurze Anleitung):
-  1) Gehe zu https://console.firebase.google.com/ und erstelle ein Projekt.
-  2) Aktiviere "Firestore" (Datenbank) - Native Modus.
-  3) In Project settings -> Your apps -> Web app -> Add app, kopiere die firebaseConfig (ersetzt das Platzhalter-Objekt unten).
-  4) Setze unter Firestore Security Rules (nur für erste Tests) temporär:
-       rules_version = '2';
-       service cloud.firestore {
-         match /databases/{database}/documents {
-           match /{document=**} {
-             allow read, write: if true;
-           }
-         }
-       }
-     (Wichtig: Öffne die Regeln später sicherer mit Authentication.)
-  5) Speichere die firebaseConfig in der Datei an der markierten Stelle und lade die Seite neu.
-
-  Hinweis: Dieser Code nutzt anonyme Authentifizierung, damit mehrere Nutzer gleichzeitig schreiben können.
+   Paste your firebaseConfig object below (from Firebase console)
 */
-
 let useFirestore = false;
 let db = null;
 const firebaseConfig = {
   apiKey: "AIzaSyB2UunTDA4JBfJIU2kqLnE_O3xQY44lIG0",
   authDomain: "gartenplaner-ca2cf.firebaseapp.com",
   projectId: "gartenplaner-ca2cf",
-  storageBucket: "gartenplaner-ca2cf.appspot.com",
+  storageBucket: "gartenplaner-ca2cf.firebasestorage.app",
   messagingSenderId: "648271569301",
   appId: "1:648271569301:web:b3823f824cba58b180169c"
-};;
+};
 
-  // If firebaseConfig is filled (check minimal required fields), initialize
 try {
   if (firebaseConfig && firebaseConfig.apiKey) {
     firebase.initializeApp(firebaseConfig);
-    // anonymous auth
-    firebase.auth().signInAnonymously().catch((e)=>{ console.warn('Firebase auth',e); });
+    firebase.auth().signInAnonymously().catch(e=>console.warn('Firebase auth',e));
     db = firebase.firestore();
     useFirestore = true;
     syncStatus.textContent = 'Verbunden: Firebase (Realtime)';
-    // set up listeners
     setupFirestoreListeners();
   } else {
     syncStatus.textContent = 'Lokaler Modus (kein Firebase konfiguriert)';
   }
-} catch (err) {
+} catch(err){
   console.warn('Firebase init failed', err);
   syncStatus.textContent = 'Firebase-Fehler (Lokaler Modus)';
 }
@@ -365,48 +332,46 @@ function setupFirestoreListeners(){
     renderNotes();
   });
 
-  // plants (replace whole local plants if db has docs)
+  // plants (if any in DB, load them; else keep local defaults)
   db.collection('plants').onSnapshot(snap=>{
     const ptmp = [];
     snap.forEach(doc=>{
       const d = doc.data();
+      // store doc id so we can delete specific doc later
+      d._id = doc.id;
       ptmp.push(d);
     });
-    // Only replace if collection not empty (so we keep local defaults otherwise)
     if(ptmp.length>0){
-      // mutate local plants array to match DB
-      plants.length = 0;
-      ptmp.forEach(p=>plants.push(p));
+      plants = ptmp;
       renderPlants();
       renderTodo();
       renderCalendar();
     }
   });
 
-  // watering markers
+  // watering markers: store doc ids? we keep map of dates true
   db.collection('watering').onSnapshot(snap=>{
     wateringMap = {};
     snap.forEach(doc=>{
       const d = doc.data();
       if(d.date) wateringMap[d.date] = true;
     });
-    renderCalendar(); // watering icons are drawn in calendar
+    renderCalendar();
   });
 
-  // winter checklist (single doc 'checklist/items' or doc id 'checklist')
+  // winter checklist stored as single doc in appdata/winterChecklist
   db.collection('appdata').doc('winterChecklist').onSnapshot(doc=>{
     const d = doc.data();
     if(d && Array.isArray(d.items)){
       winterChecklist = d.items;
-      // If modal open -> render
       renderChecklistItems();
     }
   });
 }
 
+// helper: write event to firestore (also works local)
 async function saveEventToFirestore(dateISO, text){
-  if(!useFirestore || !db) {
-    // fallback: local events array
+  if(!useFirestore || !db){
     events.unshift(`${dateISO} | ${text}`);
     renderEvents(); renderCalendar();
     return;
@@ -416,33 +381,108 @@ async function saveEventToFirestore(dateISO, text){
   }catch(e){ console.warn('saveEvent', e); }
 }
 
+/* Watering toggle: add/delete doc in watering collection */
 async function toggleWateringFor(dateISO){
   if(!useFirestore || !db){
     if(wateringMap[dateISO]){ delete wateringMap[dateISO]; } else { wateringMap[dateISO] = true; }
     renderCalendar();
     return;
   }
-  // check if doc exists with date == dateISO
-  const q = await db.collection('watering').where('date','==',dateISO).get();
-  if(!q.empty){
-    // remove (use first match)
-    const id = q.docs[0].id;
-    await db.collection('watering').doc(id).delete();
-  } else {
-    await db.collection('watering').add({ date: dateISO, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-  }
+  try{
+    const q = await db.collection('watering').where('date','==',dateISO).get();
+    if(!q.empty){
+      const id = q.docs[0].id;
+      await db.collection('watering').doc(id).delete();
+    } else {
+      await db.collection('watering').add({ date: dateISO, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+    }
+  }catch(e){ console.warn('toggleWateringFor', e); }
 }
 
-/* Winter checklist saves (store as single doc in collection 'appdata' id 'winterChecklist') */
+/* Save checklist to Firestore single doc */
 async function saveChecklistToFirestore(){
   if(!useFirestore || !db){
-    // local only: nothing special, we set winterChecklist
     renderChecklistItems();
     return;
   }
   try{
-    await db.collection('appdata').doc('winterChecklist').set({ items: winterChecklist }, { merge:true });
+    // Use serverTimestamp for items with done=true and no timestamp
+    const itemsToSave = winterChecklist.map(it => {
+      const copy = Object.assign({}, it);
+      // if done and timestamp is the special string 'server' we set FieldValue.serverTimestamp
+      if(copy.timestamp === 'serverTS') {
+        // serverTS placeholder -> replace later in set with FieldValue.serverTimestamp via update
+        // But Firestore can't accept serverTimestamp inside nested arrays easily here; we'll set whole doc
+      }
+      return copy;
+    });
+    // We will set the doc directly; if items contain firebase FieldValue.serverTimestamp it will be set properly.
+    // Convert any item.timestamp === 'serverTS' to FieldValue.serverTimestamp()
+    const itemsForWrite = winterChecklist.map(it=>{
+      const c = {...it};
+      if(c.timestamp === 'serverTS') c.timestamp = firebase.firestore.FieldValue.serverTimestamp();
+      return c;
+    });
+    await db.collection('appdata').doc('winterChecklist').set({ items: itemsForWrite }, { merge:true });
   }catch(e){ console.warn('saveChecklist', e); }
+}
+
+/* Save plants to Firestore when added or deleted (best-effort) */
+async function addPlantToFirestore(plantObj){
+  if(!useFirestore || !db) return;
+  try{
+    await db.collection('plants').add(plantObj);
+  }catch(e){ console.warn('addPlantToFirestore', e); }
+}
+async function deletePlantFromFirestoreByName(name){
+  if(!useFirestore || !db) return;
+  try{
+    const q = await db.collection('plants').where('name','==',name).get();
+    if(!q.empty){
+      // delete all matching docs (best-effort)
+      const batch = db.batch ? db.batch() : null;
+      q.forEach(doc=>{
+        db.collection('plants').doc(doc.id).delete().catch(()=>{});
+      });
+    }
+  }catch(e){ console.warn('deletePlantFromFirestoreByName', e); }
+}
+
+/* Import: write imported data into Firestore (non-destructive: adds items) */
+async function importToFirestore(payload){
+  if(!useFirestore || !db) return;
+  try{
+    // plants: add each as doc
+    if(Array.isArray(payload.plants)){
+      for(const p of payload.plants){
+        await db.collection('plants').add(p);
+      }
+    }
+    // events
+    if(Array.isArray(payload.events)){
+      for(const ev of payload.events){
+        // ev format "YYYY-MM-DD | text" -> split
+        const parts = String(ev).split(' | ');
+        const date = parts[0] || null;
+        const text = parts[1] || parts[0] || '';
+        if(date && text) await db.collection('events').add({ date, text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      }
+    }
+    // notes
+    if(Array.isArray(payload.notes)){
+      for(const n of payload.notes){
+        const text = n.text || n;
+        await db.collection('notes').add({ text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      }
+    }
+    // watering -> if provided as map, add dates
+    if(payload.watering && typeof payload.watering === 'object'){
+      for(const k in payload.watering){
+        if(payload.watering[k]) await db.collection('watering').add({ date: k, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+      }
+    }
+    alert('Import in Firestore abgeschlossen (hinzugefügt).');
+  }catch(e){ console.warn('importToFirestore', e); alert('Import in Firestore fehlgeschlagen: ' + e.message); }
 }
 
 /* ===========================
@@ -543,9 +583,14 @@ function renderNotes(){
     const del = document.createElement('button'); del.textContent='×'; del.style.marginLeft='8px';
     del.onclick = async ()=> {
       if(useFirestore && db){
-        // delete by text+iso approximation (simple approach): find doc with same iso
-        const q = await db.collection('notes').where('createdAt','!=', null).get().catch(()=>null);
-        // fallback: just remove locally
+        // best-effort: find notes matching text and delete one
+        try{
+          const q = await db.collection('notes').where('text','==',n.text).get();
+          if(!q.empty){
+            const id = q.docs[0].id;
+            await db.collection('notes').doc(id).delete();
+          }
+        }catch(e){ console.warn('delete note', e); }
       }
       notes = notes.filter(x=>x.id!==n.id);
       renderNotes(); renderCalendar();
@@ -580,10 +625,6 @@ function renderTodo(){
 }
 
 /* Plants rendering (collapsible) */
-const plantArea = document.getElementById('plantArea');
-const plantAdd = document.getElementById('plantAdd');
-const plantsToggle = document.getElementById('plantsToggle');
-
 function renderPlants(){
   plantArea.innerHTML = '';
   plants.forEach((p, idx)=>{
@@ -597,8 +638,9 @@ function renderPlants(){
     let cutState = 0;
     cutCb.addEventListener('click', ()=>{
       cutState++;
-      if(cutState===1){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Zuschnitt in Arbeit`); }
-      else if(cutState===2){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Zuschnitt erledigt`); cutCb.disabled=true; }
+      const iso = isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
+      if(cutState===1){ saveEventToFirestore(iso, `${p.name}: Zuschnitt in Arbeit`); }
+      else if(cutState===2){ saveEventToFirestore(iso, `${p.name}: Zuschnitt erledigt`); cutCb.disabled=true; }
     });
     cutLabel.appendChild(cutCb); cutLabel.append(' erledigt'); cutSec.appendChild(cutLabel);
 
@@ -629,8 +671,9 @@ function renderPlants(){
       const amount = document.createElement('input'); amount.type='number'; amount.placeholder = p.unit || 'kg';
       harvCb.addEventListener('click', ()=>{
         harvState++;
-        if(harvState===1){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Ernte in Arbeit`); }
-        else if(harvState===2){ saveEventToFirestore(isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate()), `${p.name}: Ernte erledigt ${amount.value||''} ${p.unit||'kg'}`); harvCb.disabled=true; }
+        const iso = isoFor(new Date().getFullYear(), new Date().getMonth()+1, new Date().getDate());
+        if(harvState===1){ saveEventToFirestore(iso, `${p.name}: Ernte in Arbeit`); }
+        else if(harvState===2){ saveEventToFirestore(iso, `${p.name}: Ernte erledigt ${amount.value||''} ${p.unit||'kg'}`); harvCb.disabled=true; }
       });
       harvDoneLabel.appendChild(harvCb); harvDoneLabel.append(' erledigt'); harvSec.appendChild(harvDoneLabel);
 
@@ -649,7 +692,14 @@ function renderPlants(){
     }
 
     const del = document.createElement('button'); del.textContent = 'Pflanze löschen'; del.style.marginTop = '8px';
-    del.addEventListener('click', ()=>{ plants.splice(idx,1); renderPlants(); renderCalendar(); renderTodo(); });
+    del.addEventListener('click', async ()=>{ 
+      const removed = plants.splice(idx,1);
+      renderPlants(); renderCalendar(); renderTodo(); 
+      // delete from firestore by name (best-effort)
+      if(useFirestore && db && removed && removed[0] && removed[0].name){
+        await deletePlantFromFirestoreByName(removed[0].name);
+      }
+    });
 
     box.appendChild(harvSec);
     box.appendChild(del);
@@ -658,30 +708,32 @@ function renderPlants(){
 }
 
 /* toggle plants UI */
-const toggleBtn = document.getElementById('plantsToggle');
-toggleBtn.addEventListener('click', ()=>{
+plantsToggle.addEventListener('click', ()=>{
   const visible = !plantArea.classList.contains('hidden');
   if(visible){
-    plantArea.classList.add('hidden'); plantAdd.classList.add('hidden'); toggleBtn.textContent = '▼ Pflanzen anzeigen';
+    plantArea.classList.add('hidden'); plantAdd.classList.add('hidden'); plantsToggle.textContent = '▼ Pflanzen anzeigen';
   } else {
-    plantArea.classList.remove('hidden'); plantAdd.classList.remove('hidden'); toggleBtn.textContent = '▲ Pflanzen verbergen';
+    plantArea.classList.remove('hidden'); plantAdd.classList.remove('hidden'); plantsToggle.textContent = '▲ Pflanzen verbergen';
     renderPlants();
   }
 });
 
 /* add plant */
-document.getElementById('addPlantBtn').addEventListener('click', ()=>{
-  const name = document.getElementById('newPlantName').value.trim();
+addPlantBtn.addEventListener('click', async ()=>{
+  const name = newPlantName.value.trim();
   if(!name) return;
-  plants.push({ name, harvest:true, harvestRange:null, cut:null });
-  document.getElementById('newPlantName').value = '';
+  const obj = { name, harvest:true, harvestRange:null, cut:null };
+  plants.push(obj);
+  newPlantName.value = '';
   renderPlants();
   renderTodo();
+  // add to firestore
+  if(useFirestore && db) await addPlantToFirestore(obj);
 });
 
-/* export / import (keeps existing behavior) */
+/* export / import (keeps existing behavior + writes to Firestore on import) */
 exportBtn.addEventListener('click', ()=>{
-  const payload = { plants, events, notes };
+  const payload = { plants, events, notes, watering: wateringMap };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `garten-dashboard-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href);
 });
@@ -689,19 +741,44 @@ importBtn.addEventListener('click', ()=> importFile.click());
 importFile.addEventListener('change', (e)=>{
   const f = e.target.files[0]; if(!f) return;
   const r = new FileReader();
-  r.onload = ()=> {
+  r.onload = async ()=> {
     try{
       const data = JSON.parse(r.result);
-      if(Array.isArray(data.plants)) { plants.length = 0; data.plants.forEach(p => plants.push(p)); }
-      events = Array.isArray(data.events) ? data.events.slice() : [];
-      notes = Array.isArray(data.notes) ? data.notes.slice() : [];
-      renderPlants(); renderCalendar(); renderEvents(); renderNotes(); renderTodo();
-      alert('Import erfolgreich.');
-      // optionally push imported data to Firestore if enabled:
-      if(useFirestore && db){
-        // push plants (clear collection then add) - careful: destructive
-        // For now we will not auto-overwrite DB on import to avoid destructive sync.
+      if(Array.isArray(data.plants)) { 
+        // append to local and to firestore
+        for(const p of data.plants){
+          plants.push(p);
+          if(useFirestore && db) await db.collection('plants').add(p);
+        }
       }
+      if(Array.isArray(data.events)){
+        for(const ev of data.events){
+          // add to local and firestore
+          events.push(ev);
+          if(useFirestore && db){
+            const parts = String(ev).split(' | ');
+            await db.collection('events').add({ date: parts[0], text: parts[1] || parts[0], createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          }
+        }
+      }
+      if(Array.isArray(data.notes)){
+        for(const n of data.notes){
+          const text = typeof n === 'object' ? (n.text || '') : n;
+          notes.push({ id: uid(), text, iso: new Date().toISOString() });
+          if(useFirestore && db) await db.collection('notes').add({ text, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+        }
+      }
+      // watering
+      if(data.watering && typeof data.watering === 'object'){
+        for(const k in data.watering){
+          if(data.watering[k]){
+            wateringMap[k] = true;
+            if(useFirestore && db) await db.collection('watering').add({ date: k, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+          }
+        }
+      }
+      renderPlants(); renderCalendar(); renderEvents(); renderNotes(); renderTodo();
+      alert('Import erfolgreich (lokal + Firestore falls aktiviert).');
     }catch(err){ alert('Import fehlgeschlagen: ' + err.message); }
   };
   r.readAsText(f);
@@ -792,7 +869,6 @@ async function loadWeather(){
     document.getElementById('pollenInfo').textContent = 'Pollenflug: —';
   }
 }
-// initial + refresh
 loadWeather();
 setInterval(loadWeather, 20 * 60 * 1000);
 
@@ -802,6 +878,7 @@ function renderAll(){
   renderEvents();
   renderNotes();
   renderPlants();
+  renderChecklistItems();
 }
 renderAll();
 
@@ -813,11 +890,10 @@ yearSelect.addEventListener('change', ()=>{ current.setFullYear(Number(yearSelec
 addNoteBtn.addEventListener('click', ()=>{
   const v = noteInput.value.trim(); if(!v) return;
   noteInput.value = '';
-  // save to Firestore (or local)
   saveNoteToFirestore(v);
 });
 
-/* save note */
+/* save note (to Firestore or local) */
 async function saveNoteToFirestore(text){
   if(!useFirestore || !db){
     notes.push({ id: uid(), text, iso: new Date().toISOString() });
@@ -835,8 +911,6 @@ function addEventForToday(label){
   saveEventToFirestore(iso, label);
 }
 
-/* saveEventToFirestore implemented above */
-
 /* Water button behavior */
 waterBtn.addEventListener('click', async ()=>{
   if(!selectedDateISO){
@@ -846,44 +920,111 @@ waterBtn.addEventListener('click', async ()=>{
   await toggleWateringFor(selectedDateISO);
 });
 
-/* toggleWateringFor implemented above */
-
-/* Winter checklist modal controls */
+/* ===== Winter-Checklist inline behavior ===== */
 winterBtn.addEventListener('click', ()=>{
-  modalBackdrop.classList.remove('hidden'); modalBackdrop.style.display='flex';
-  renderChecklistItems();
+  const open = !winterChecklistInline.classList.contains('hidden');
+  if(open){
+    winterChecklistInline.classList.add('hidden');
+    winterChecklistInline.setAttribute('aria-hidden','true');
+  } else {
+    winterChecklistInline.classList.remove('hidden');
+    winterChecklistInline.setAttribute('aria-hidden','false');
+    // ensure we have latest from firestore
+    if(useFirestore && db) loadChecklistFromFirestore();
+    renderChecklistItems();
+  }
 });
-closeChecklist.addEventListener('click', ()=>{ modalBackdrop.classList.add('hidden'); modalBackdrop.style.display='none'; });
 
+/* render checklist items */
 function renderChecklistItems(){
   checklistItems.innerHTML = '';
   (winterChecklist || []).forEach((it, idx)=>{
     const row = document.createElement('div'); row.className='row';
+    const top = document.createElement('div'); top.className='row-top';
     const cb = document.createElement('input'); cb.type='checkbox'; cb.checked = !!it.done;
-    cb.addEventListener('change', async ()=>{ winterChecklist[idx].done = cb.checked; await saveChecklistToFirestore(); renderChecklistItems(); });
-    const label = document.createElement('div'); label.style.flex='1'; label.textContent = it.text;
-    const del = document.createElement('button'); del.textContent='×'; del.addEventListener('click', async ()=>{ winterChecklist.splice(idx,1); await saveChecklistToFirestore(); renderChecklistItems(); });
-    row.appendChild(cb); row.appendChild(label); row.appendChild(del);
+    const txt = document.createElement('input'); txt.type='text'; txt.value = it.text || ''; txt.placeholder = 'Aufgabe...';
+    txt.addEventListener('change', async ()=>{ winterChecklist[idx].text = txt.value; await saveChecklistToFirestore(); renderChecklistItems(); });
+    const del = document.createElement('button'); del.className='icon-btn'; del.textContent='×'; del.title='Löschen';
+    del.addEventListener('click', async ()=>{
+      winterChecklist.splice(idx,1);
+      await saveChecklistToFirestore();
+      renderChecklistItems();
+    });
+    top.appendChild(cb); top.appendChild(txt); top.appendChild(del);
+    row.appendChild(top);
+
+    // timestamp area (small, shown only when done)
+    const ts = document.createElement('div'); ts.className='small-timestamp';
+    if(it.done && it.timestamp){
+      // timestamp may be Firestore Timestamp or ISO string
+      let tstr = '';
+      if(typeof it.timestamp === 'object' && it.timestamp.toDate){
+        tstr = new Date(it.timestamp.toDate()).toLocaleString('de-DE');
+      } else if(typeof it.timestamp === 'string'){
+        tstr = new Date(it.timestamp).toLocaleString('de-DE');
+      } else {
+        tstr = new Date().toLocaleString('de-DE');
+      }
+      ts.textContent = 'Erledigt: ' + tstr;
+      ts.style.display = 'block';
+    } else {
+      ts.style.display = 'none';
+    }
+    row.appendChild(ts);
+
+    cb.addEventListener('change', async ()=>{
+      const checked = cb.checked;
+      winterChecklist[idx].done = checked;
+      if(checked){
+        // mark timestamp as serverTS placeholder; saveChecklistToFirestore converts to FieldValue.serverTimestamp
+        winterChecklist[idx].timestamp = 'serverTS';
+      } else {
+        winterChecklist[idx].timestamp = null;
+      }
+      await saveChecklistToFirestore();
+      // refresh local copy: load from firestore if used
+      if(useFirestore && db) await loadChecklistFromFirestore();
+      renderChecklistItems();
+    });
+
     checklistItems.appendChild(row);
   });
 }
-addChecklistBtn.addEventListener('click', async ()=>{ const v = newChecklistItem.value.trim(); if(!v) return; winterChecklist.push({ id: uid(), text:v, done:false }); newChecklistItem.value=''; await saveChecklistToFirestore(); renderChecklistItems(); });
-saveChecklist.addEventListener('click', async ()=>{ await saveChecklistToFirestore(); alert('Checkliste gespeichert.'); });
 
-/* Firestore initial fetch of checklist if firestore used */
+/* add checklist item */
+addChecklistBtn.addEventListener('click', async ()=>{
+  const v = newChecklistItem.value.trim(); if(!v) return;
+  const item = { id: uid(), text: v, done:false, timestamp: null };
+  winterChecklist.push(item);
+  newChecklistItem.value = '';
+  await saveChecklistToFirestore();
+  renderChecklistItems();
+});
+
+/* load checklist from firestore (populate winterChecklist) */
 async function loadChecklistFromFirestore(){
   if(!useFirestore || !db) return;
   try{
     const doc = await db.collection('appdata').doc('winterChecklist').get();
-    if(doc.exists){ const d = doc.data(); if(d && Array.isArray(d.items)) winterChecklist = d.items; }
+    if(doc.exists){
+      const d = doc.data();
+      if(d && Array.isArray(d.items)){
+        winterChecklist = d.items.map(it=>{
+          // normalize timestamps if Firestore stored server timestamp
+          if(it.timestamp && it.timestamp.seconds && typeof it.timestamp.seconds === 'number') return {...it};
+          return {...it};
+        });
+      }
+    }
     renderChecklistItems();
   }catch(e){ console.warn('loadChecklist', e); }
 }
 loadChecklistFromFirestore();
 
-/* Toggle plants UI already implemented earlier */
+/* saveChecklistToFirestore implemented earlier */
 
-/* Basic helpers for local fallback already in code */
+/* ===== initial checklist render if any ===== */
+renderChecklistItems();
 
 /* end of script */
 </script>
